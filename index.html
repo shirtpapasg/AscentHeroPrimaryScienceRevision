@@ -7,11 +7,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Retro Hero's Ascent: Science Edition</title>
   
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- React & ReactDOM -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   
+  <!-- Babel for in-browser JSX compilation -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
@@ -19,145 +22,100 @@
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
 
     body {
-      margin: 0;
-      padding: 0;
-      background-color: #050b14; /* Deep navy background matching image */
-      color: white;
-      overflow: hidden;
-      font-family: monospace;
+      margin: 0; padding: 0; background-color: #050b14; color: white;
+      overflow: hidden; font-family: monospace;
       -webkit-text-size-adjust: 100%; 
       touch-action: none; -webkit-touch-callout: none;
       -webkit-user-select: none; user-select: none;
     }
 
-    /* --- EXACT LAYOUT REPLICATION --- */
+    /* --- BULLETPROOF GAME LAYOUT --- */
     .game-layout {
       display: flex; flex-direction: column; width: 100%; height: 100%;
       padding: 16px; gap: 16px; box-sizing: border-box; overflow: hidden;
     }
-
-    /* Left Side: Map Viewport */
+    
     .game-viewport {
-      flex: 1 1 auto; 
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background-color: #000; 
-      position: relative; overflow: hidden;
-      border: 3px solid white; 
-      min-width: 0; min-height: 0; 
+      flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background-color: #000; position: relative; overflow: hidden;
+      border: 3px solid white; min-width: 0; min-height: 0; 
     }
 
-    /* Right Side: UI Sidebar */
     .game-sidebar {
       display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; width: 100%; min-height: 0;
     }
 
     @media (min-width: 1024px) {
-      .game-layout { 
-        flex-direction: row; 
-        padding: 32px; 
-        gap: 24px; 
-        justify-content: center; 
-        align-items: stretch;
-        max-width: 1400px; 
-        margin: 0 auto; 
-      }
-      .game-viewport {
-        flex: 1;
-        aspect-ratio: 1 / 1;
-        max-height: 100%;
-      }
+      .game-layout { flex-direction: row; padding: 32px; gap: 24px; justify-content: center; align-items: stretch; max-width: 1400px; margin: 0 auto; }
+      .game-viewport { flex: 1; aspect-ratio: 1 / 1; max-height: 100%; }
       .game-sidebar { width: 380px; height: 100%; }
     }
 
-    /* --- FONTS & UI ELEMENTS --- */
+    /* UI Utilities */
     .pixel-font { font-family: 'Press Start 2P', monospace; letter-spacing: 1px; }
-    
+    .monster-font { font-family: 'Nunito', sans-serif; }
+
     .pixel-btn {
       padding: 0.75rem 1.5rem; border: 2px solid #fff;
       font-weight: bold; text-transform: uppercase; transition: all 0.1s; cursor: pointer;
     }
     .pixel-btn:active:not(:disabled) { transform: translateY(2px); }
     .pixel-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(100%); }
-    
     .ui-panel { border: 3px solid #fff; }
 
-    /* Custom D-PAD styling from image */
-    .d-pad-grid {
-      display: grid;
-      grid-template-columns: 50px 50px 50px;
-      grid-template-rows: 50px 50px 50px;
-      gap: 6px;
-      align-items: center;
-      justify-items: center;
-    }
-    .d-pad-btn {
-      background-color: #cbd5e1; /* Light gray */
-      color: #0f172a;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 8px;
-      border-bottom: 6px solid #64748b; /* Chunky bottom border */
-      cursor: pointer;
-      transition: all 0.05s;
-    }
-    .d-pad-btn:active {
-      border-bottom-width: 2px;
-      transform: translateY(4px);
-    }
-    .d-pad-center {
-      background-color: #94a3b8;
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .d-pad-center::after {
-      content: '';
-      width: 12px;
-      height: 12px;
-      background-color: #475569;
-      border-radius: 50%;
-    }
+    /* Custom D-PAD styling */
+    .d-pad-grid { display: grid; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px 50px; gap: 6px; align-items: center; justify-items: center; }
+    .d-pad-btn { background-color: #cbd5e1; color: #0f172a; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; border-radius: 8px; border-bottom: 6px solid #64748b; cursor: pointer; transition: all 0.05s; touch-action: none; }
+    .d-pad-btn:active { border-bottom-width: 2px; transform: translateY(4px); }
+    .d-pad-center { background-color: #94a3b8; width: 100%; height: 100%; border-radius: 8px; display: flex; justify-content: center; align-items: center; }
+    .d-pad-center::after { content: ''; width: 12px; height: 12px; background-color: #475569; border-radius: 50%; }
 
-    /* Scrollbars */
+    .scrollable { touch-action: pan-y !important; overscroll-behavior-y: contain; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-track { background: #000; }
+    .custom-scroll::-webkit-scrollbar-track { background: #000; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
 
-    /* --- EFFECTS --- */
+    /* Visual Effects */
     @keyframes flashRed { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(220, 38, 38, 0.5); } }
     .flash-red-screen { animation: flashRed 0.6s ease-out; }
     
+    @keyframes flashYellowDouble { 0%, 100% { background-color: transparent; } 25% { background-color: rgba(253, 224, 71, 0.4); } 50% { background-color: transparent; } 75% { background-color: rgba(253, 224, 71, 0.4); } }
+    .vfx-double-yellow { animation: flashYellowDouble 0.8s ease-out; }
+
     @keyframes flashGreen { 0%, 100% { border-color: #fff; } 50% { border-color: #22c55e; box-shadow: 0px 0px 20px 5px rgba(34, 197, 94, 0.8); } }
     .flash-green-panel { animation: flashGreen 1.0s; }
 
-    /* --- TERRAIN TEXTURES (Matched to Screenshot) --- */
+    @keyframes flashUlt { 0%, 100% { filter: invert(0); } 50% { filter: invert(1); } }
+    .flash-ult-screen { animation: flashUlt 0.6s 2; }
+
+    @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 20% { transform: translate(-5px, 0px) rotate(2deg); } 40% { transform: translate(2px, -2px) rotate(1deg); } 60% { transform: translate(-5px, 2px) rotate(0deg); } 80% { transform: translate(-2px, -2px) rotate(2deg); } 100% { transform: translate(2px, -4px) rotate(-1deg); } }
+    .animate-shake { animation: shake 0.6s ease-in-out; }
+
+    @keyframes popEffect { 0% { transform: scale(0.5); opacity: 1; } 50% { transform: scale(2); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+    .vfx-pop { animation: popEffect 0.6s ease-out forwards; pointer-events: none; }
+
+    @keyframes ultEffect { 0% { transform: scale(0.1) rotate(0deg); opacity: 1; filter: hue-rotate(0deg); } 50% { transform: scale(4) rotate(180deg); opacity: 1; filter: hue-rotate(180deg); } 100% { transform: scale(6) rotate(360deg); opacity: 0; filter: hue-rotate(360deg); } }
+    .vfx-ult { animation: ultEffect 1.4s ease-out forwards; pointer-events: none; }
+
+    @keyframes healEffect { 0% { transform: translateY(20px) scale(0.8); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
+    .vfx-heal { animation: healEffect 1.6s ease-out forwards; pointer-events: none; }
+
+    @keyframes deathEffect { 0% { filter: grayscale(0%); opacity: 1; transform: scale(1) translateY(0); } 40% { filter: grayscale(100%); opacity: 0.8; transform: scale(0.9) translateY(10px); } 100% { filter: grayscale(100%); opacity: 0; transform: scale(0.5) translateY(50px); } }
+    .vfx-death { animation: deathEffect 1.5s ease-out forwards; pointer-events: none; }
+    
+    @keyframes faintFlash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2) contrast(1.2); } }
+    .vfx-faint-flash { animation: faintFlash 0.3s ease-out; }
+
+    /* Terrain Textures */
     .terrain-grass { background-color: #63d13e; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
-    .terrain-forest { 
-      background-color: #1e8c20; 
-      background-image: radial-gradient(#156016 30%, transparent 30%); 
-      background-size: 8px 8px;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); 
-    }
-    .terrain-mountain { 
-      background-color: #8b5a2b; 
-      background-image: linear-gradient(45deg, #704822 25%, transparent 25%, transparent 75%, #704822 75%, #704822), linear-gradient(45deg, #704822 25%, transparent 25%, transparent 75%, #704822 75%, #704822);
-      background-size: 16px 16px;
-      background-position: 0 0, 8px 8px;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
-    }
+    .terrain-forest { background-color: #1e8c20; background-image: radial-gradient(#156016 30%, transparent 30%); background-size: 8px 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
+    .terrain-mountain { background-color: #8b5a2b; background-image: linear-gradient(45deg, #704822 25%, transparent 25%, transparent 75%, #704822 75%, #704822), linear-gradient(45deg, #704822 25%, transparent 25%, transparent 75%, #704822 75%, #704822); background-size: 16px 16px; background-position: 0 0, 8px 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3); }
     .terrain-water { background-color: #3b82f6; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
     .terrain-path { background-color: #d1a569; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
     .terrain-demon { background-color: #4a1010; }
     .terrain-lava { background-color: #ef4444; }
     .terrain-cave { background-color: #1f2937; }
 
-    /* Loader */
     #sls-loader { position: fixed; inset: 0; background-color: #050b14; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fbbf24; font-family: 'Press Start 2P', monospace; z-index: 9999; }
     @keyframes fast-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
     .loader-icon { font-size: 3rem; animation: fast-pulse 0.8s infinite; margin-bottom: 20px; }
@@ -166,14 +124,8 @@
   <script>
     window.addEventListener('error', function(e) {
       var loader = document.getElementById('sls-loader');
-      if (loader) loader.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px; line-height:1.5;"><b>Error Loading Game</b><br/><br/>The environment might be blocking local storage or scripts.<br/><br/><span style="font-size:10px;">' + e.message + '</span></div>';
+      if (loader) loader.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px; line-height:1.5;"><b>Error Loading Game</b><br/><br/>The environment might be blocking scripts.<br/><br/><span style="font-size:10px;">' + e.message + '</span></div>';
     });
-    setTimeout(function() {
-      var loader = document.getElementById('sls-loader');
-      if (loader && loader.style.display !== 'none' && loader.innerHTML.indexOf('Error') === -1) {
-         loader.innerHTML += '<br/><br/><div style="font-size:10px; color:#9ca3af; text-align:center;">Compiling... please wait.</div>';
-      }
-    }, 3000);
   </script>
 </head>
 <body>
@@ -191,8 +143,9 @@
       render() {
         if (this.state.hasError) {
           return (
-            <div style={{ padding: '20px', color: 'white', backgroundColor: '#050b14', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+            <div style={{ padding: '20px', color: 'white', backgroundColor: '#050b14', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justify-content: 'center', textAlign: 'center' }}>
               <h2 style={{ color: '#ef4444', fontSize: '24px', marginBottom: '16px', fontFamily: '"Press Start 2P", monospace' }}>SYSTEM ERROR</h2>
+              <pre style={{ fontSize: '10px', color: '#fca5a5', maxWidth: '80%', overflowX: 'auto', marginBottom: '24px' }}>{this.state.error && this.state.error.toString()}</pre>
               <button onClick={() => { try { localStorage.removeItem('retroHeroSave'); } catch(e){} window.location.reload(); }} className="pixel-btn bg-red-600">CLEAR SAVE & RESTART</button>
             </div>
           );
@@ -208,10 +161,12 @@
     const ArrowDownIcon = ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
     const ArrowLeftIcon = ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>;
     const ArrowRightIcon = ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>;
+    const SparklesIcon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>;
 
     // --- AUDIO SYSTEM ---
     let audioCtx = null;
-    let isMuted = false;
+    let bgmInterval = null;
+    let globalIsMuted = false; // Internal tracking
 
     const getAudioCtx = () => {
       try {
@@ -221,36 +176,159 @@
         return audioCtx;
       } catch (err) { return null; }
     };
-    const toggleMute = () => { isMuted = !isMuted; return isMuted; };
+    const toggleMute = () => { globalIsMuted = !globalIsMuted; return globalIsMuted; };
 
-    // --- QUESTION BANKS (Sample P3-P6 Science) ---
+    const playTone = (freq, type, duration, vol = 0.1, slideFreq = null) => {
+      if (globalIsMuted) return;
+      try {
+        const ctx = getAudioCtx(); if (!ctx) return;
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.type = type; osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        if (slideFreq) osc.frequency.exponentialRampToValueAtTime(slideFreq, ctx.currentTime + duration);
+        gain.gain.setValueAtTime(vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    };
+
+    const sfx = {
+      attack: () => playTone(400, 'square', 0.2, 0.1, 80),
+      potion: () => playTone(250, 'sine', 0.5, 0.1, 600),
+      treasure: () => { playTone(400, 'square', 0.15, 0.05, 600); setTimeout(() => playTone(600, 'square', 0.2, 0.05, 900), 150); },
+      defeat: () => playTone(100, 'sawtooth', 1.0, 0.15, 30),
+      flee: () => { playTone(400, 'square', 0.15, 0.05, 600); setTimeout(() => playTone(300, 'square', 0.15, 0.05, 500), 150); },
+      levelUp: () => { playTone(196.00, 'square', 0.3); setTimeout(() => playTone(261.63, 'square', 0.3), 300); setTimeout(() => playTone(329.63, 'square', 0.8), 600); },
+      ultimate: () => { playTone(150, 'sawtooth', 1.0, 0.2, 600); setTimeout(() => playTone(200, 'sawtooth', 1.0, 0.2, 800), 100); }
+    };
+
+    const playMusic = (trackType) => {
+      if (bgmInterval) clearInterval(bgmInterval);
+      let step = 0; let speed = 450; let notes = [73.4, 110.0, 146.8, 174.6, 146.8, 110.0]; let type = 'triangle'; let vol = 0.05;
+      if (trackType === 'combat') { speed = 130; notes = [392.0, 523.25, 659.25, 523.25, 783.99, 659.25]; type = 'square'; vol = 0.03; } 
+      else if (trackType === 'boss') { speed = 400; notes = [32.7, 32.7, 36.7, 32.7, 49.0, 32.7]; type = 'sawtooth'; vol = 0.06; }
+      bgmInterval = setInterval(() => { if (!globalIsMuted) playTone(notes[step % notes.length], type, speed / 1000 + 0.1, vol); step++; }, speed);
+    };
+    const stopMusic = () => { if (bgmInterval) clearInterval(bgmInterval); };
+
+    // --- EXPANDED QUESTION BANKS ---
     const QUESTION_BANKS = {
       P3: {
-        "Diversity": [
-          { q: "Which of the following shows that living things respond to changes?", options: ["A millipede rolling up when touched.", "A young plant growing taller.", "A tiger eating meat."], correct: "A millipede rolling up when touched." },
-          { q: "Which material is waterproof and best for making an umbrella?", options: ["Plastic", "Wood", "Cotton"], correct: "Plastic" }
+        "Diversity (Living/Non-Living & Materials)": [
+          { q: "Which of the following shows that living things respond to changes?", options: ["A millipede rolling up when touched.", "A young plant growing taller.", "A bird laying eggs.", "A tiger eating meat."], correct: "A millipede rolling up when touched." },
+          { q: "What do all living things need to survive?", options: ["Air, food, and water.", "Sunlight, soil, and water.", "Air, shelter, and meat.", "Water, shelter, and soil."], correct: "Air, food, and water." },
+          { q: "How are plants different from animals?", options: ["Plants can make their own food, but animals cannot.", "Plants need air, but animals do not.", "Plants cannot grow, but animals can.", "Plants do not reproduce, but animals do."], correct: "Plants can make their own food, but animals cannot." },
+          { q: "Which animal breathes through gills and has scales?", options: ["Fish", "Amphibian", "Reptile", "Mammal"], correct: "Fish" },
+          { q: "Which animal group has a body covering of hair or fur?", options: ["Mammals", "Birds", "Reptiles", "Amphibians"], correct: "Mammals" },
+          { q: "Which material is waterproof and best for making an umbrella?", options: ["Plastic", "Wood", "Paper", "Cotton"], correct: "Plastic" },
+          { q: "Why is glass used to make window panes?", options: ["It is transparent.", "It is flexible.", "It is magnetic.", "It absorbs water."], correct: "It is transparent." }
+        ],
+        "Systems (Plant & Human)": [
+          { q: "Which body system transports blood around the human body?", options: ["Circulatory System", "Digestive System", "Respiratory System", "Skeletal System"], correct: "Circulatory System" },
+          { q: "Which plant part holds the plant firmly to the ground?", options: ["Roots", "Stem", "Leaves", "Flowers"], correct: "Roots" },
+          { q: "Which body system gives the human body its shape?", options: ["Skeletal System", "Muscular System", "Digestive System", "Respiratory System"], correct: "Skeletal System" },
+          { q: "Which part of the plant makes food?", options: ["Leaves", "Roots", "Stem", "Flowers"], correct: "Leaves" },
+          { q: "What is the main function of the human respiratory system?", options: ["To take in oxygen and remove carbon dioxide.", "To digest food.", "To pump blood.", "To support the body."], correct: "To take in oxygen and remove carbon dioxide." }
+        ],
+        "Interactions (Magnets)": [
+          { q: "Which of the following is a magnetic material?", options: ["Steel", "Copper", "Aluminum", "Wood"], correct: "Steel" },
+          { q: "Where is the magnetic pull of a bar magnet the strongest?", options: ["At its poles", "At its center", "On its sides", "It is equal everywhere"], correct: "At its poles" },
+          { q: "What happens when the North pole of a magnet faces the South pole of another?", options: ["They attract.", "They repel.", "Nothing happens.", "They lose magnetism."], correct: "They attract." },
+          { q: "What happens when the North pole of a magnet faces the North pole of another?", options: ["They repel.", "They attract.", "Nothing happens.", "They explode."], correct: "They repel." }
         ]
       },
       P4: {
-        "Cycles": [
-          { q: "Which state of matter has a definite volume but no definite shape?", options: ["Liquid", "Solid", "Gas"], correct: "Liquid" }
+        "Cycles (Matter)": [
+          { q: "Which correctly identifies the stages of a mosquito's life cycle?", options: ["Egg -> Larva -> Pupa -> Adult", "Egg -> Pupa -> Larva -> Adult", "Egg -> Nymph -> Adult -> Pupa", "Egg -> Larva -> Adult"], correct: "Egg -> Larva -> Pupa -> Adult" },
+          { q: "What property of matter does a syringe filled with air prove when compressed?", options: ["Gas can be compressed.", "Gas has a definite shape.", "Gas has a definite mass.", "Gas expands when heated."], correct: "Gas can be compressed." },
+          { q: "Which state of matter has a definite volume but no definite shape?", options: ["Liquid", "Solid", "Gas", "Plasma"], correct: "Liquid" },
+          { q: "Which animal has a 3-stage life cycle?", options: ["Cockroach", "Butterfly", "Mosquito", "Beetle"], correct: "Cockroach" }
+        ],
+        "Energy (Light & Heat)": [
+          { q: "What is the definition of a 'heat conductor'?", options: ["A material that allows heat to pass through it easily.", "A material that blocks heat.", "A material that creates its own heat.", "A material that changes state easily."], correct: "A material that allows heat to pass through it easily." },
+          { q: "What happens to a shadow when the object moves further away from the light source?", options: ["The shadow becomes smaller.", "The shadow becomes larger.", "The shadow disappears.", "The shadow changes shape."], correct: "The shadow becomes smaller." },
+          { q: "Why are cooking pots usually made of metal?", options: ["Metals are good conductors of heat.", "Metals are good insulators of heat.", "Metals are light.", "Metals melt easily."], correct: "Metals are good conductors of heat." }
         ]
       },
       P5: {
-        "Systems": [
-          { q: "What is the function of the 'nucleus' in a cell?", options: ["It controls all activities.", "It makes food.", "It gives shape."], correct: "It controls all activities." }
+        "Cycles (Water & Reproduction)": [
+          { q: "What is the definition of 'condensation' in the water cycle?", options: ["Water vapour losing heat and changing to liquid water.", "Liquid water gaining heat and changing to water vapour.", "Ice melting into water.", "Water freezing into ice."], correct: "Water vapour losing heat and changing to liquid water." },
+          { q: "At what temperature does pure water boil?", options: ["100 degrees Celsius", "0 degrees Celsius", "50 degrees Celsius", "212 degrees Celsius"], correct: "100 degrees Celsius" },
+          { q: "What is the transfer of pollen grains from the anther to the stigma called?", options: ["Pollination", "Fertilisation", "Germination", "Dispersal"], correct: "Pollination" }
+        ],
+        "Systems (Cells & Transport)": [
+          { q: "What is the function of the 'nucleus' in a cell?", options: ["It controls all activities within the cell.", "It makes food for the cell.", "It gives the cell a regular shape.", "It allows substances to move in and out."], correct: "It controls all activities within the cell." },
+          { q: "Which part of a plant cell contains chlorophyll to make food?", options: ["Chloroplast", "Nucleus", "Cell Wall", "Cytoplasm"], correct: "Chloroplast" },
+          { q: "Which cell part is found in plant cells but NOT in animal cells?", options: ["Cell Wall", "Cell Membrane", "Nucleus", "Cytoplasm"], correct: "Cell Wall" }
         ]
       },
       P6: {
-        "Forces": [
-          { q: "What is the definition of 'frictional force'?", options: ["A force that opposes motion.", "A pull exerted by the Earth.", "A magnetic force."], correct: "A force that opposes motion." }
+        "Interactions (Forces)": [
+          { q: "What is the definition of 'frictional force'?", options: ["A force that opposes motion between two surfaces in contact.", "A pull exerted by the Earth.", "A force that pulls magnetic materials.", "A force exerted by a stretched spring."], correct: "A force that opposes motion between two surfaces in contact." },
+          { q: "Which force causes a ball thrown into the air to fall back down?", options: ["Gravitational force", "Frictional force", "Magnetic force", "Elastic spring force"], correct: "Gravitational force" }
+        ],
+        "Energy (Kinetic & Potential)": [
+          { q: "A ball rolls down a ramp. What energy conversion is happening?", options: ["Potential Energy is converting into Kinetic Energy.", "Kinetic Energy is converting into Potential Energy.", "Heat Energy is converting into Kinetic Energy.", "Light Energy is converting into Potential Energy."], correct: "Potential Energy is converting into Kinetic Energy." },
+          { q: "What kind of energy does a moving car possess?", options: ["Kinetic energy", "Potential energy", "Light energy", "Sound energy"], correct: "Kinetic energy" }
         ]
       }
     };
 
     const MAP_SIZE = 35; 
-    const CLASSES = { Warrior: { hp: 160, atk: 25, def: 20, color: '#2563eb', ultName: 'Omnislash' } };
+    const CLASSES = {
+      Warrior: { hp: 160, atk: 25, def: 20, hpGrow: 40, atkGrow: 12, defGrow: 8, basicAttackName: 'Sword Dance', ultName: 'Omnislash', color: '#1d4ed8' }, 
+      Mage: { hp: 100, atk: 40, def: 10, hpGrow: 20, atkGrow: 18, defGrow: 4, basicAttackName: 'Cast', ultName: 'Meteor Strike', color: '#7e22ce' }, 
+      Archer: { hp: 120, atk: 30, def: 14, hpGrow: 25, atkGrow: 15, defGrow: 6, basicAttackName: 'Shoot', ultName: 'Piercing Arrow', color: '#15803d' }, 
+      Rogue: { hp: 110, atk: 35, def: 12, hpGrow: 22, atkGrow: 16, defGrow: 5, basicAttackName: 'Surprise Move', ultName: 'Shadow Dance', color: '#374151' } 
+    };
+
     const EXP_REQUIREMENTS = [0, 50, 150, 300, 500, 800, 1200, 1800, 2500, 3500];
+
+    const ENEMIES = [
+      { name: 'Slime', hp: 45, atk: 15, def: 5, exp: 25, gold: 15, minLevel: 1, icon: '💧', dropTier: 1, zone: 'grass' },
+      { name: 'Giant Rat', hp: 35, atk: 18, def: 3, exp: 20, gold: 10, minLevel: 1, icon: '🐀', dropTier: 1, zone: 'grass' },
+      { name: 'Wild Dog', hp: 40, atk: 20, def: 4, exp: 22, gold: 12, minLevel: 1, icon: '🐕', dropTier: 1, zone: 'grass' },
+      { name: 'Forest Spider', hp: 50, atk: 16, def: 6, exp: 28, gold: 18, minLevel: 1, icon: '🕷️', dropTier: 1, zone: 'forest' },
+      { name: 'Goblin', hp: 80, atk: 25, def: 12, exp: 55, gold: 25, minLevel: 2, icon: '👺', dropTier: 1, zone: 'grass' },
+      { name: 'Cave Bat', hp: 60, atk: 35, def: 8, exp: 70, gold: 30, minLevel: 2, icon: '🦇', dropTier: 1, zone: 'cave' },
+      { name: 'Dire Wolf', hp: 90, atk: 28, def: 10, exp: 60, gold: 28, minLevel: 2, icon: '🐺', dropTier: 1, zone: 'forest' },
+      { name: 'Wild Ram', hp: 70, atk: 26, def: 15, exp: 50, gold: 20, minLevel: 2, icon: '🐏', dropTier: 1, zone: 'demon' },
+      { name: 'Orc', hp: 160, atk: 45, def: 20, exp: 120, gold: 50, minLevel: 3, icon: '🐗', dropTier: 2, zone: 'grass' },
+      { name: 'Cave Troll', hp: 280, atk: 65, def: 35, exp: 250, gold: 100, minLevel: 4, icon: '🧌', dropTier: 3, zone: 'cave' },
+      { name: 'Stone Golem', hp: 350, atk: 55, def: 50, exp: 280, gold: 120, minLevel: 4, icon: '🪨', dropTier: 3, zone: 'cave' },
+      { name: 'Hermit Crab', hp: 60, atk: 20, def: 15, exp: 35, gold: 20, minLevel: 1, icon: '🐚', dropTier: 1, zone: 'sea' },
+      { name: 'Killer Shark', hp: 220, atk: 60, def: 20, exp: 200, gold: 85, minLevel: 4, icon: '🦈', dropTier: 3, zone: 'sea' }
+    ];
+
+    const ELITES = {
+      '1': { name: 'Cave Behemoth', hp: 600, atk: 75, def: 45, exp: 600, gold: 300, isElite: true, icon: '🦖', magicDrop: { type: 'weapon', name: 'Crystal Sword', atk: 75 } },
+      '2': { name: 'Alpha Gorilla', hp: 900, atk: 95, def: 55, exp: 1000, gold: 500, isElite: true, icon: '🦍', magicDrop: { type: 'armor', name: 'Titanium Plate', def: 65 } },
+      '3': { name: 'Forest Ent', hp: 500, atk: 60, def: 40, exp: 500, gold: 250, isElite: true, icon: '🌳', magicDrop: { type: 'armor', name: 'Bark Shield', def: 50 } },
+      '4': { name: 'Ruin Golem', hp: 700, atk: 80, def: 60, exp: 800, gold: 400, isElite: true, icon: '🗿', magicDrop: { type: 'weapon', name: 'Titan Hammer', atk: 85 } },
+      '5': { name: 'Siren Queen', hp: 7000, atk: 300, def: 180, exp: 9000, gold: 3500, isElite: true, isBossLevel: true, icon: '🧜‍♀️', magicDrop: { type: 'weapon', name: 'Ocean Trident', atk: 220, doubleUlt: true } },
+      '6': { name: 'Immortal Phoenix', hp: 12000, atk: 450, def: 300, exp: 15000, gold: 6000, isElite: true, isBossLevel: true, icon: '🦅', magicDrop: { type: 'necklace', name: 'Phoenix Tear', regen: 100, hasRevive: true } },
+      'X': { name: 'Celestial Dragon', hp: 8500, atk: 350, def: 200, exp: 12000, gold: 4000, isElite: true, isBossLevel: true, icon: '🐉', magicDrop: { type: 'armor', name: 'Chrono Shield', def: 250, allowsUltEveryTurn: true } }
+    };
+
+    const BOSS = { name: 'Apex Chimera', hp: 20000, atk: 800, def: 500, exp: 40000, gold: 20000, isBoss: true, isBossLevel: true, icon: '🦁' };
+
+    const SHOP_ITEMS = {
+      weapons: [{ name: 'Iron Sword', atk: 15, cost: 100, type: 'weapon' }, { name: 'Steel Blade', atk: 35, cost: 350, type: 'weapon' }, { name: 'Hero Lance', atk: 65, cost: 800, type: 'weapon' }],
+      armors: [{ name: 'Leather Vest', def: 10, cost: 100, type: 'armor' }, { name: 'Chainmail', def: 25, cost: 350, type: 'armor' }, { name: 'Hero Plate', def: 50, cost: 800, type: 'armor' }],
+      necklaces: [{ name: 'Silver Pendant', regen: 10, cost: 300, type: 'necklace' }, { name: 'Gold Amulet', regen: 30, cost: 900, type: 'necklace' }]
+    };
+
+    const MYSTICAL_ITEMS = {
+      weapons: [{ name: 'Beast Slayer', atk: 150, cost: 2200, type: 'weapon' }],
+      armors: [{ name: 'Aegis Shield', def: 100, cost: 1800, type: 'armor' }],
+      consumables: [{ name: 'Elixir of Life', heal: 999, cost: 500 }],
+      keyItems: [{ name: 'Magic Sail', cost: 1000, type: 'keyItem', desc: 'Allows Sea Travel' }]
+    };
+
+    const NORMAL_DROPS = {
+      1: [{ type: 'weapon', name: 'Rusty Blade', atk: 10 }, { type: 'armor', name: 'Tattered Shirt', def: 8 }],
+      2: [{ type: 'weapon', name: 'Iron Mace', atk: 25 }, { type: 'armor', name: 'Bronze Guard', def: 20 }],
+      3: [{ type: 'weapon', name: 'Steel Axe', atk: 45 }, { type: 'armor', name: 'Knight Shield', def: 40 }]
+    };
 
     const generateMap = () => {
       let map = Array(MAP_SIZE).fill(null).map(() => Array(MAP_SIZE).fill('.'));
@@ -258,108 +336,636 @@
         for (let x = 0; x < MAP_SIZE; x++) {
           if (x === 0 || y === 0 || x === MAP_SIZE - 1 || y === MAP_SIZE - 1) { map[y][x] = '~'; continue; } 
           const r = Math.abs(Math.sin(x * 12.9898 + y * 78.233)) * 43758.5453 % 1;
-          if (r < 0.15) map[y][x] = 'M'; else if (r < 0.35) map[y][x] = 'T'; else map[y][x] = '.'; 
+          if (r < 0.12) map[y][x] = 'M'; else if (r < 0.35) map[y][x] = 'T'; else map[y][x] = '.'; 
         }
       }
-      for (let x = 12; x <= 18; x++) map[15][x] = '.'; 
-      for (let y = 12; y <= 18; y++) map[y][15] = '.'; 
-      map[15][15] = 'O'; // Town
+      for (let x = 5; x <= 25; x++) map[15][x] = '.'; 
+      for (let y = 5; y <= 25; y++) map[y][15] = '.'; 
+
+      for(let i=1; i<8; i++) { map[1][i] = '~'; map[2][i] = '~'; map[i][1] = '~'; map[i][2] = '~'; }
+      map[2][2] = '5'; map[3][5] = 'i'; 
+      for(let y=1; y<=10; y++) for(let x=25; x<=33; x++) map[y][x] = 'M'; 
+      for(let y=2; y<=9; y++) for(let x=26; x<=32; x++) map[y][x] = 'L'; 
+      map[4][30] = 'B'; map[6][28] = '2'; map[10][29] = '.'; map[9][29] = 'L'; map[12][29] = 'i';
+      for(let y=3; y<=7; y++) for(let x=13; x<=17; x++) map[y][x] = '~';
+      for(let y=4; y<=6; y++) for(let x=14; x<=16; x++) map[y][x] = 'L';
+      map[5][15] = '6'; map[9][15] = 'i'; 
+      for(let y=25; y<=33; y++) for(let x=1; x<=11; x++) map[y][x] = 'M'; 
+      map[29][1] = '~'; map[29][2] = 'C'; map[29][3] = '_'; map[29][4] = '_'; map[29][5] = '1'; map[27][6] = 'i'; 
+      map[8][8] = '3'; map[24][20] = '4'; 
+      for(let y=14; y<=16; y++) for(let x=14; x<=16; x++) map[y][x] = '.';
+      map[15][15] = 'O'; 
+      map[33][33] = 'S'; map[33][32] = '.'; map[32][33] = '.'; map[32][32] = '.'; map[30][31] = 'X'; map[32][29] = 'i'; 
       return map;
     };
 
-    const HeroSprite = ({ tunicColor = "#1d4ed8" }) => (
-      <div className="animate-bounce z-10 flex items-center justify-center" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>
-        <svg viewBox="0 0 16 16" width="80%" height="80%" shapeRendering="crispEdges">
-          <rect x="4" y="0" width="8" height="2" fill="#5c3a21" />
-          <rect x="3" y="2" width="10" height="2" fill="#5c3a21" />
-          <rect x="4" y="4" width="8" height="4" fill="#fcae7c" />
-          <rect x="5" y="5" width="1" height="2" fill="#000" />
-          <rect x="10" y="5" width="1" height="2" fill="#000" />
-          <rect x="4" y="9" width="8" height="4" fill={tunicColor} />
-          <rect x="3" y="15" width="4" height="1" fill="#4a2e1b" />
-          <rect x="9" y="15" width="4" height="1" fill="#4a2e1b" />
-        </svg>
-      </div>
-    );
+    const generateTreasures = (map) => {
+      const treasures = [];
+      for (let i = 0; i < 25; i++) {
+        const x = Math.floor(Math.random() * MAP_SIZE);
+        const y = Math.floor(Math.random() * MAP_SIZE);
+        if ((map[y][x] === '.' || map[y][x] === 'T') && !treasures.find(t => t.x === x && t.y === y)) {
+          treasures.push({ id: Math.random(), x, y });
+        }
+      }
+      return treasures;
+    };
+
+    const HeroSprite = ({ tunicColor = "#1d4ed8", boat = false }) => {
+      if (boat) return <span className="animate-bounce" style={{ fontSize: '1.5rem', filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>⛵</span>;
+      return (
+        <div className="animate-bounce z-10 flex items-center justify-center" style={{ width: '100%', height: '100%', maxWidth: '40px', maxHeight: '40px', filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>
+          <svg viewBox="0 0 16 16" width="75%" height="75%" shapeRendering="crispEdges" preserveAspectRatio="xMidYMid meet">
+            <rect x="4" y="0" width="8" height="2" fill="#5c3a21" />
+            <rect x="3" y="2" width="10" height="2" fill="#5c3a21" />
+            <rect x="2" y="3" width="2" height="3" fill="#5c3a21" />
+            <rect x="12" y="3" width="2" height="3" fill="#5c3a21" />
+            <rect x="4" y="4" width="8" height="4" fill="#fcae7c" />
+            <rect x="5" y="5" width="1" height="2" fill="#000" />
+            <rect x="10" y="5" width="1" height="2" fill="#000" />
+            <rect x="3" y="8" width="10" height="1" fill="#fff" />
+            <rect x="4" y="9" width="8" height="4" fill={tunicColor} />
+            <rect x="4" y="12" width="8" height="1" fill="#333" />
+            <rect x="7" y="12" width="2" height="1" fill="#fbbf24" />
+            <rect x="2" y="9" width="2" height="2" fill="#fcae7c" />
+            <rect x="12" y="9" width="2" height="2" fill="#fcae7c" />
+            <rect x="4" y="13" width="3" height="2" fill="#f3f4f6" />
+            <rect x="9" y="13" width="3" height="2" fill="#f3f4f6" />
+            <rect x="3" y="15" width="4" height="1" fill="#4a2e1b" />
+            <rect x="9" y="15" width="4" height="1" fill="#4a2e1b" />
+          </svg>
+        </div>
+      );
+    };
 
     function App() {
-      const [gameState, setGameState] = useState('EXPLORE'); 
-      const [logs, setLogs] = useState([{id: 1, message: 'Welcome! You chose 3 Science topic(s). Answer wisely to power your ultimate!', color: '#facc15'}]);
-      const [worldMap, setWorldMap] = useState(generateMap());
+      // --- ALL GAME STATE ---
+      const [gameState, setGameState] = useState('START'); 
+      const [logs, setLogs] = useState([]);
+      const [mistakeLog, setMistakeLog] = useState([]); 
+      const [activeMenu, setActiveMenu] = useState(null); 
+      
+      const [worldMap, setWorldMap] = useState([]);
+      const [treasures, setTreasures] = useState([]);
       const [playerPos, setPlayerPos] = useState({ x: 15, y: 15 });
       const posRef = useRef({ x: 15, y: 15 }); 
       
+      const availableGrades = ['P3', 'P4', 'P5', 'P6'];
+      const [selectedGrade, setSelectedGrade] = useState('P3');
+      const [selectedTopics, setSelectedTopics] = useState(
+        Object.keys(QUESTION_BANKS['P3']).map(t => `P3|${t}`)
+      );
+
       const [player, setPlayer] = useState({
         name: 'HERO', charClass: 'Warrior', level: 1, exp: 0, gold: 50, potions: 3, 
-        hp: 160, maxHp: 160, atk: 25, def: 20, weapon: null, armor: null, necklace: null, startTime: Date.now()
+        hp: 160, maxHp: 160, atk: 25, def: 20, weapon: null, armor: null, necklace: null, ultCooldown: 0, hasBoat: false, hasRevivedThisBattle: false, selectedTopics: [],
+        inventory: [], startTime: Date.now(), answers: []
       });
 
-      const [screenVfx, setScreenVfx] = useState(null); 
-      const [, setForceRender] = useState(0);
+      const [currentEnemy, setCurrentEnemy] = useState(null);
+      const [fightingEliteId, setFightingEliteId] = useState(null); 
+      const [pendingLoot, setPendingLoot] = useState(null);
+      
+      const [showQuiz, setShowQuiz] = useState(false);
+      const [quizProblem, setQuizProblem] = useState(null);
+      const [isActionLocked, setIsActionLocked] = useState(false); 
+      const [quizType, setQuizType] = useState(null); 
+      const [ultAnswers, setUltAnswers] = useState([]);
+      const unaskedQuestions = useRef([]); 
 
-      const addLog = (message, color = '#d1d5db') => setLogs(prev => [...prev.slice(-10), { id: Date.now() + Math.random(), message, color }]);
+      const [screenVfx, setScreenVfx] = useState(null); 
+      const [enemyVfx, setEnemyVfx] = useState(null); 
+      const [overlayVfx, setOverlayVfx] = useState(null); 
+      const [, setForceRender] = useState(0);
+      const [tick, setTick] = useState(0);
+
+      const logEndRef = useRef(null);
+
+      const [hasSave, setHasSave] = useState(false);
+      const [confirmReset, setConfirmReset] = useState(false);
+      const [isAudioMuted, setIsAudioMuted] = useState(false); // UI State for Audio
+
+      // Remove the Initial Loading Screen
+      useEffect(() => {
+        const loader = document.getElementById('sls-loader');
+        if (loader) loader.style.display = 'none';
+        try { if (localStorage.getItem('retroHeroSave')) setHasSave(true); } catch(e){}
+      }, []);
+
+      useEffect(() => { if (logEndRef.current) logEndRef.current.scrollIntoView({ behavior: 'smooth' }); }, [logs]);
+
+      useEffect(() => {
+        if (['EXPLORE', 'TOWN', 'SHOP', 'MYSTICAL_SHOP', 'LOOT'].includes(gameState)) playMusic('explore');
+        else if (gameState === 'COMBAT') {
+          if (currentEnemy?.isBossLevel) playMusic('boss');
+          else playMusic('combat');
+        }
+        else stopMusic();
+        return () => stopMusic();
+      }, [gameState, currentEnemy]);
+
+      useEffect(() => {
+        const timer = setInterval(() => setTick(t => t + 1), 1000);
+        return () => clearInterval(timer);
+      }, []);
+
+      const totalAtk = player.atk + (player.weapon ? player.weapon.atk : 0);
+      const totalDef = player.def + (player.armor ? player.armor.def : 0);
+
+      const triggerScreenVFX = (effect, duration = 800) => { setScreenVfx(effect); setTimeout(() => setScreenVfx(null), duration); };
+      const triggerEnemyVFX = (effect, duration = 300) => { setEnemyVfx(effect); setTimeout(() => setEnemyVfx(null), duration); };
+      const triggerOverlayVFX = (effect, duration = 600) => { setOverlayVfx(effect); setTimeout(() => setOverlayVfx(null), duration); };
+      const addLog = (message, color = '#d1d5db') => setLogs(prev => [...prev.slice(-30), { id: Date.now() + Math.random(), message, color }]);
+      const calculateDamage = (atk, def) => Math.max(1, Math.floor((atk - def) * (0.8 + Math.random() * 0.4)));
+
+      const getDifficultyColor = (enemy, player) => {
+        if (!enemy) return 'white';
+        const playerPower = player.maxHp + (player.atk * 5) + (player.def * 5);
+        const enemyPower = enemy.hp + (enemy.atk * 5) + (enemy.def * 5);
+        const ratio = enemyPower / playerPower;
+        if (ratio > 2.5) return '#ef4444'; 
+        if (ratio > 1.2) return '#f59e0b'; 
+        return '#22c55e'; 
+      };
+
+      const handleGradeChange = (e) => {
+        const newGrade = e.target.value;
+        setSelectedGrade(newGrade);
+        const maxIdx = availableGrades.indexOf(newGrade);
+        const newAvailable = [];
+        for(let i=0; i<=maxIdx; i++) {
+          const g = availableGrades[i];
+          Object.keys(QUESTION_BANKS[g] || {}).forEach(t => newAvailable.push(`${g}|${t}`));
+        }
+        setSelectedTopics(newAvailable);
+      };
+
+      const getNextScienceQuestion = () => {
+        if (unaskedQuestions.current.length === 0) {
+          let questionsPool = [];
+          player.selectedTopics.forEach(tId => {
+             const [g, t] = tId.split('|');
+             if (QUESTION_BANKS[g] && QUESTION_BANKS[g][t]) {
+                 questionsPool.push(...QUESTION_BANKS[g][t].map(q => ({...q, topic: tId})));
+             }
+          });
+          if (questionsPool.length === 0) questionsPool.push(...QUESTION_BANKS['P3']['Diversity (Living/Non-Living & Materials)'].map(q => ({...q, topic: 'P3|Diversity (Living/Non-Living & Materials)'})));
+          unaskedQuestions.current = questionsPool.sort(() => Math.random() - 0.5);
+        }
+        return unaskedQuestions.current.pop();
+      };
+
+      const startGame = () => {
+        getAudioCtx();
+        const newMap = generateMap(); setWorldMap(newMap); setTreasures(generateTreasures(newMap));
+        setGameState('CREATE');
+      };
+
+      const createCharacter = (e) => {
+        e.preventDefault();
+        if (selectedTopics.length === 0) return; 
+        
+        const formData = new FormData(e.target);
+        const charClass = formData.get('charClass') || 'Warrior'; 
+        const base = CLASSES[charClass];
+        
+        setPlayer({
+          name: (formData.get('name') || 'Hero').toUpperCase(), charClass, selectedTopics: selectedTopics,
+          level: 1, exp: 0, gold: 50, potions: 3, hp: base.hp, maxHp: base.hp, atk: base.atk, def: base.def,
+          weapon: null, armor: null, necklace: null, ultCooldown: 0, hasBoat: false, hasRevivedThisBattle: false, inventory: [],
+          startTime: Date.now(), answers: []
+        });
+        
+        let questionsPool = [];
+        selectedTopics.forEach(tId => {
+           const [g, t] = tId.split('|');
+           if (QUESTION_BANKS[g] && QUESTION_BANKS[g][t]) {
+               questionsPool.push(...QUESTION_BANKS[g][t].map(q => ({...q, topic: tId})));
+           }
+        });
+        unaskedQuestions.current = questionsPool.sort(() => Math.random() - 0.5);
+
+        setPlayerPos({ x: 15, y: 15 }); posRef.current = { x: 15, y: 15 }; setLogs([]); setMistakeLog([]);
+        addLog(`Welcome! You chose ${selectedTopics.length} Science topic(s). Answer wisely to power your ultimate!`, '#facc15');
+        setGameState('EXPLORE');
+      };
+
+      const respawnPlayer = () => {
+        setPlayer(p => ({ ...p, hp: p.maxHp, gold: Math.floor(p.gold / 2) }));
+        setPlayerPos({ x: 15, y: 15 }); posRef.current = { x: 15, y: 15 }; 
+        setGameState('TOWN');
+        addLog("Your soul returns to Sanctuary Town. Half your gold was lost.", "#f87171");
+      };
 
       const move = useCallback((dx, dy) => {
-        if (gameState !== 'EXPLORE') return;
+        if (gameState !== 'EXPLORE' || activeMenu) return;
+        
         const nx = ((posRef.current.x + dx) % MAP_SIZE + MAP_SIZE) % MAP_SIZE;
         const ny = ((posRef.current.y + dy) % MAP_SIZE + MAP_SIZE) % MAP_SIZE;
-        const tile = worldMap[ny][nx];
         
-        if (tile === 'M' || tile === '~') return; // Collision
+        const tile = worldMap[ny][nx];
+        if (tile === 'M' || tile === 'W') return; 
+        
+        if (tile === '~' && !player.hasBoat) {
+          addLog("The deep sea blocks your path. You need a Magic Sail.", "#60a5fa"); return;
+        }
+        
+        if (tile === 'B' && player.level < 5) { addLog("Barrier repels you! Level up 4 times (Lv 5) to enter.", "#f87171"); return; }
 
-        posRef.current = { x: nx, y: ny }; 
-        setPlayerPos({ x: nx, y: ny });
+        posRef.current = { x: nx, y: ny }; setPlayerPos({ x: nx, y: ny });
 
-        if (tile === 'O') { addLog("Entered Sanctuary Town.", "#facc15"); } 
-      }, [gameState, worldMap]);
+        if (tile === 'L') {
+          setPlayer(p => {
+            const newHp = p.hp - 10;
+            if (newHp <= 0) { setTimeout(() => { sfx.defeat(); setGameState('GAME_OVER'); }, 100); } 
+            else { triggerScreenVFX('flash-red', 400); }
+            return { ...p, hp: Math.max(0, newHp) };
+          });
+          if (player.hp - 10 <= 0) { addLog("You burned to death in the lava fields!", "#ef4444"); return; } 
+          else { addLog("LAVA! The heat burns you for 10 DMG!", "#ef4444"); }
+        }
+
+        if (tile === 'i') {
+          if (nx === 29 && ny === 12) addLog("SIGN: 'He strikes for 60% of your soul. Without the blazing bird's tear, defeat is certain.'", "#67e8f9");
+          else if (nx === 6 && ny === 27) addLog("SIGN: 'Sail behind the western stone crags to find the dark maw where the Cave Behemoth slumbers.'", "#67e8f9");
+          else if (nx === 29 && ny === 32) addLog("SIGN: 'To cast magic without rest, seek the Celestial Dragon across the eastern blue. A Magic Sail is required.'", "#67e8f9");
+          else if (nx === 5 && ny === 3) addLog("SIGN: 'Her song is relentless. Do not face the Siren Queen without at least 30 potions in your bag!'", "#facc15");
+          else if (nx === 15 && ny === 9) addLog("SIGN: 'The Immortal Phoenix drops a tear that turns death into an illusion. Seek the northern volcano.'", "#facc15");
+          else addLog("SIGN: Read carefully, hero.", "#67e8f9");
+        }
+
+        const tIdx = treasures.findIndex(t => t.x === nx && t.y === ny);
+        if (tIdx > -1) {
+          sfx.treasure(); setTreasures(prev => prev.filter((_, i) => i !== tIdx));
+          const r = Math.random();
+          if (r < 0.4) { setPlayer(p => { p.potions += 1; return {...p}; }); addLog("Found a Potion in the chest!", "#f472b6"); } 
+          else if (r < 0.8) { const amt = Math.floor(Math.random() * 40) + 20; setPlayer(p => { p.gold += amt; return {...p}; }); addLog(`Chest contained ${amt} Gold!`, "#facc15"); } 
+          else {
+            const tDrops = NORMAL_DROPS[Math.min(3, Math.ceil(player.level / 2))]; const drop = tDrops[Math.floor(Math.random() * tDrops.length)];
+            setPendingLoot(drop); setGameState('LOOT'); return; 
+          }
+        }
+
+        if (tile === 'O') { setGameState('TOWN'); addLog("Entered Sanctuary Town.", "#facc15"); } 
+        else if (tile === 'S') { setGameState('MYSTICAL_SHOP'); addLog("You found the hidden Mystical Shop!", "#c084fc"); }
+        else if (tile === 'B') challengeBoss();
+        else if (['1', '2', '3', '4', '5', '6', 'X'].includes(tile)) challengeElite(tile);
+        else if (['C', '_'].includes(tile) && Math.random() < 0.10) generateEnemy('cave'); 
+        else if (tile === 'D' && Math.random() < 0.10) generateEnemy('demon');
+        else if (tile === 'T' && Math.random() < 0.12) generateEnemy('forest');
+        else if (tile === '~' && Math.random() < 0.12) generateEnemy('sea'); 
+        else if (tile === '.' && Math.random() < 0.06) generateEnemy('grass');
+      }, [gameState, activeMenu, player.level, worldMap, treasures, player.weapon, player.armor, player.hasBoat, player.hp]);
 
       useEffect(() => {
         const handleKeyDown = (e) => {
-          if (gameState !== 'EXPLORE') return;
+          if (gameState !== 'EXPLORE' || activeMenu) return;
           switch(e.key) {
-            case 'ArrowUp': case 'w': move(0, -1); break;
-            case 'ArrowDown': case 's': move(0, 1); break;
-            case 'ArrowLeft': case 'a': move(-1, 0); break;
-            case 'ArrowRight': case 'd': move(1, 0); break;
+            case 'ArrowUp': case 'w': case 'W': move(0, -1); break;
+            case 'ArrowDown': case 's': case 'S': move(0, 1); break;
+            case 'ArrowLeft': case 'a': case 'A': move(-1, 0); break;
+            case 'ArrowRight': case 'd': case 'D': move(1, 0); break;
             default: break;
           }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-      }, [gameState, move]);
+      }, [gameState, activeMenu, move]);
 
-      // --- RENDER MAP TILES (Viewport) ---
+      const generateEnemy = (zone) => {
+        let pool = ENEMIES.filter(e => player.level >= e.minLevel - 1);
+        const zonePool = pool.filter(e => e.zone === zone);
+        if (zonePool.length > 0) pool = zonePool; 
+        if (pool.length === 0) return;
+        const template = pool[Math.floor(Math.random() * pool.length)];
+        setCurrentEnemy({ ...template, maxHp: template.hp, isDead: false });
+        setFightingEliteId(null); setPlayer(p => ({ ...p, ultCooldown: 0, hasRevivedThisBattle: false })); setShowQuiz(false); setIsActionLocked(false);
+        setGameState('COMBAT'); addLog(`A wild ${template.name} appeared!`, getDifficultyColor(template, player));
+      };
+
+      const challengeElite = (eliteId) => {
+        const template = ELITES[eliteId]; 
+        if (!template) return;
+        setCurrentEnemy({ ...template, maxHp: template.hp, isDead: false });
+        setFightingEliteId(eliteId); setPlayer(p => ({ ...p, ultCooldown: 0, hasRevivedThisBattle: false })); setShowQuiz(false); setIsActionLocked(false);
+        setGameState('COMBAT'); addLog(`ELITE ENCOUNTER: ${template.name}!`, '#c084fc');
+      };
+
+      const challengeBoss = () => {
+        setCurrentEnemy({ ...BOSS, maxHp: BOSS.hp, isDead: false }); setFightingEliteId(null); setPlayer(p => ({ ...p, ultCooldown: 0, hasRevivedThisBattle: false })); setShowQuiz(false); setIsActionLocked(false);
+        setGameState('COMBAT'); addLog(`Barrier shattered! Prepare for the ${BOSS.name}!`, '#ef4444');
+      };
+
+      const triggerScienceChallenge = () => {
+        if (isActionLocked) return;
+        const nextQ = getNextScienceQuestion();
+        if (!nextQ) return; 
+        const shuffledOptions = [...nextQ.options].sort(() => Math.random() - 0.5);
+        setQuizProblem({ q: nextQ.q, options: shuffledOptions, correct: nextQ.correct, topic: nextQ.topic });
+        setShowQuiz(true);
+      };
+
+      const handleQuizAnswer = (chosenOption) => {
+        const isCorrect = chosenOption === quizProblem.correct;
+        
+        let p = { ...player };
+        if (quizProblem) {
+          p.answers = [...(p.answers || []), { q: quizProblem.q, topic: quizProblem.topic, isCorrect }];
+          if (!isCorrect) {
+            setMistakeLog(prev => {
+              if (prev.some(m => m.q === quizProblem.q)) return prev;
+              return [...prev, { q: quizProblem.q, correct: quizProblem.correct, chosen: chosenOption }];
+            });
+          }
+        }
+        setPlayer(p); 
+        setShowQuiz(false);
+
+        if (quizType === 'ATTACK') {
+          executeCombatAction('ATTACK', isCorrect, p);
+        } else if (quizType === 'ULTIMATE_1') {
+          if (isCorrect) {
+            setUltAnswers([true]);
+            addLog('Correct! One more question to charge ultimate...', '#fde047');
+            setQuizType('ULTIMATE_2');
+            setTimeout(() => { triggerScienceChallenge(); }, 400); 
+          } else {
+            executeCombatAction('ULTIMATE', false, p);
+          }
+        } else if (quizType === 'ULTIMATE_2') {
+           executeCombatAction('ULTIMATE', isCorrect, p);
+        }
+      };
+
+      const executeCombatAction = (type, isCorrect = null, updatedPlayer = player) => {
+        if (isActionLocked || !currentEnemy || currentEnemy.isDead) return; 
+        setIsActionLocked(true); 
+
+        let p = { ...updatedPlayer }; let e = { ...currentEnemy }; let turnPassed = true; let didDamageThisTurn = false;
+        
+        if (type === 'ATTACK') {
+          if (isCorrect) {
+            sfx.attack(); triggerEnemyVFX('vfx-faint-flash', 300); triggerScreenVFX('shake', 500);
+            const pDmg = calculateDamage(totalAtk, e.def); e.hp -= pDmg; 
+            didDamageThisTurn = true; addLog(`Used ${CLASSES[p.charClass].basicAttackName} for ${pDmg} DMG!`, '#f3f4f6');
+          } else {
+            addLog(`${CLASSES[p.charClass].basicAttackName} missed! Focus faltered...`, '#9ca3af');
+            didDamageThisTurn = false;
+          }
+        } else if (type === 'POTION') {
+          if (p.potions <= 0) { setIsActionLocked(false); return; } 
+          sfx.potion(); triggerScreenVFX('flash-green', 1000); triggerOverlayVFX('heal', 1600);
+          p.potions -= 1; const heal = Math.floor(p.maxHp * 0.5); p.hp = Math.min(p.maxHp, p.hp + heal); 
+          addLog(`Recovered ${heal} HP.`, '#4ade80'); didDamageThisTurn = false; 
+        } else if (type === 'ULTIMATE') {
+          p.ultCooldown = (p.weapon?.allowsUltEveryTurn || p.armor?.allowsUltEveryTurn || p.necklace?.allowsUltEveryTurn) ? 0 : 3; 
+          
+          const successChance = isCorrect ? 1.0 : 0.20; 
+
+          if (isCorrect) {
+            addLog(`Correct Answers! Limit Break!`, '#fde047');
+          } else {
+            addLog(`Wrong Answer! Focus faltered...`, '#9ca3af');
+          }
+
+          if (Math.random() <= successChance) {
+            sfx.ultimate(); triggerScreenVFX('flash-ult', 1200); triggerScreenVFX('shake', 1400); triggerOverlayVFX('ultimate', 1400);
+            didDamageThisTurn = true; 
+            const strikes = (p.weapon?.doubleUlt || p.armor?.doubleUlt || p.necklace?.doubleUlt) ? 2 : 1;
+            for(let i=0; i<strikes; i++) {
+              setTimeout(() => {
+                if (e.hp <= 0) return;
+                const pDmg = calculateDamage(totalAtk * 3, e.def); e.hp -= pDmg;
+                addLog(`${i>0?'Double Strike! ':''}Unleashed ${CLASSES[p.charClass].ultName} for ${pDmg} DMG!`, '#c084fc');
+                setCurrentEnemy({...e});
+              }, i * 600);
+            }
+          } else { 
+            addLog(`${CLASSES[p.charClass].ultName} misfired!`, '#9ca3af'); didDamageThisTurn = false; 
+          }
+        } else if (type === 'FLEE') {
+          sfx.flee(); addLog("Ran away!","#9ca3af"); setFightingEliteId(null); setIsActionLocked(false); setGameState('EXPLORE'); return;
+        }
+
+        setTimeout(() => {
+          if (p.hp > 0 && e.hp > 0 && p.necklace?.regen) {
+            p.hp = Math.min(p.maxHp, p.hp + p.necklace.regen);
+            addLog(`Necklace regenerated ${p.necklace.regen} HP.`, '#86efac');
+          }
+
+          if (e.hp <= 0 && !e.isDead) {
+            e.hp = 0; e.isDead = true; setCurrentEnemy(e);
+            sfx.defeat(); triggerScreenVFX('shake', 800);
+            
+            addLog(`Defeated ${e.name}! Got ${e.exp} EXP, ${e.gold} G.`, '#facc15');
+            p.exp += e.exp; p.gold += e.gold; 
+
+            let droppedLoot = null;
+            if (e.isElite) { droppedLoot = e.magicDrop; } 
+            else if (!e.isBoss) {
+              if (Math.random() < 0.35) {
+                if (Math.random() < 0.4) { p.potions += 1; addLog(`Dropped a Potion!`, '#f472b6'); }
+                else { const tDrops = NORMAL_DROPS[e.dropTier] || NORMAL_DROPS[1]; droppedLoot = tDrops[Math.floor(Math.random() * tDrops.length)]; }
+              }
+            }
+
+            if (fightingEliteId) { setWorldMap(prev => { const nm = [...prev]; nm[posRef.current.y][posRef.current.x] = fightingEliteId === '1' ? '_' : '.'; return nm; }); }
+            
+            let nextLvExp = EXP_REQUIREMENTS[p.level] || (p.level * 1000); let leveledUp = false;
+            while (p.exp >= nextLvExp) {
+              leveledUp = true; p.level += 1;
+              const growth = CLASSES[p.charClass]; p.maxHp += growth.hpGrow; p.atk += growth.atkGrow; p.def += growth.defGrow; 
+              addLog(`LEVEL UP! Reached Level ${p.level}!`, '#60a5fa'); nextLvExp = EXP_REQUIREMENTS[p.level] || (p.level * 1000);
+            }
+            
+            setPlayer(p);
+            setTimeout(() => {
+              if(leveledUp) sfx.levelUp(); setIsActionLocked(false); 
+              if (droppedLoot) { setPendingLoot(droppedLoot); setGameState('LOOT'); } 
+              else if (e.isBoss) { setGameState('VICTORY'); } 
+              else { setGameState('EXPLORE'); }
+            }, 1500); 
+            return;
+          }
+
+          if (turnPassed && e.hp > 0 && !e.isDead) {
+            setTimeout(() => {
+              if (e.isDead) { setIsActionLocked(false); return; }
+
+              if (e.name === 'Demon King' && !didDamageThisTurn && e.hp < e.maxHp) {
+                e.hp = e.maxHp; triggerScreenVFX('flash-green', 800); addLog(`The Demon King sensed your hesitation and fully healed!`, '#c084fc');
+              }
+
+              let eDmg = calculateDamage(e.atk, totalDef);
+              if (e.name === 'Demon King') eDmg = Math.floor(p.maxHp * 0.60); 
+
+              p.hp -= eDmg; triggerScreenVFX('flash-red', 600); 
+              
+              if (e.name === 'Demon King') addLog(`Demon King's dark aura crushes you for ${eDmg} DMG (60% Max HP)!`, '#ef4444');
+              else addLog(`${e.name} hit you for ${eDmg} DMG.`, '#f87171');
+              
+              if (p.hp <= 0) {
+                if (p.necklace?.hasRevive && !p.hasRevivedThisBattle) {
+                  p.hp = p.maxHp; p.hasRevivedThisBattle = true; sfx.potion(); triggerScreenVFX('flash-green', 1000);
+                  addLog(`🔥 PHOENIX TEAR ACTIVATED! You rise from the ashes!`, '#facc15');
+                } else {
+                  sfx.defeat(); setPlayer(p); addLog(`You were slain...`, '#dc2626');
+                  setTimeout(() => { setIsActionLocked(false); setGameState('GAME_OVER'); }, 2000); return;
+                }
+              }
+              setPlayer(p); setCurrentEnemy(e); setIsActionLocked(false); 
+            }, 700); 
+            if (p.ultCooldown > 0) p.ultCooldown -= 1;
+          }
+        }, (p.weapon?.doubleUlt || p.armor?.doubleUlt || p.necklace?.doubleUlt) && type === 'ULTIMATE' && didDamageThisTurn ? 800 : 0); 
+      };
+
+      const buyItem = (type, item) => {
+        if (player.gold >= item.cost) {
+          if(type === 'consumable') {
+            setPlayer({ ...player, gold: player.gold - item.cost, hp: player.maxHp, potions: player.potions + 1 });
+            addLog(`Bought ${item.name}! HP maxed!`, "#fde047"); sfx.potion();
+          } else if (type === 'keyItem') {
+            setPlayer({ ...player, gold: player.gold - item.cost, hasBoat: true });
+            addLog(`Bought ${item.name}! You can now sail the sea!`, "#93c5fd"); sfx.potion();
+          } else {
+            if (player.inventory.length >= 10) { addLog("Bag is full!", "#ef4444"); return; }
+            setPlayer({ ...player, gold: player.gold - item.cost, inventory: [...player.inventory, item] }); 
+            addLog(`Bought ${item.name}! Sent to bag.`, "#fde047"); sfx.potion();
+          }
+        } else addLog("Not enough Gold.", "#f87171");
+      };
+
+      const handleLootDecision = (action) => {
+        if (action === 'TAKE') {
+          if (player.inventory.length >= 10) return; 
+          setPlayer(p => ({ ...p, inventory: [...p.inventory, pendingLoot] }));
+          addLog(`Took ${pendingLoot.name} into Bag!`, '#4ade80');
+        } else {
+          const scrapValue = pendingLoot.cost ? Math.floor(pendingLoot.cost / 4) : (pendingLoot.atk > 60 || pendingLoot.def > 50 || pendingLoot.regen > 10 ? 200 : 30);
+          setPlayer(p => ({ ...p, gold: p.gold + scrapValue }));
+          addLog(`Scrapped item for ${scrapValue} Gold.`, '#eab308');
+        }
+        setPendingLoot(null); setGameState('EXPLORE');
+      };
+
+      const usePotionOverworld = () => {
+        if (player.potions > 0 && player.hp < player.maxHp) {
+          sfx.potion(); const heal = Math.floor(player.maxHp * 0.5);
+          setPlayer(p => ({ ...p, potions: p.potions - 1, hp: Math.min(p.maxHp, p.hp + heal) }));
+          addLog(`Used potion. Recovered ${heal} HP.`, '#4ade80');
+        } else if (player.hp >= player.maxHp) {
+          addLog(`HP is already full.`, '#9ca3af');
+        }
+      };
+
+      const equipItemFromBag = (index) => {
+        const itemToEquip = player.inventory[index];
+        const slot = itemToEquip.type; 
+        const currentEquipped = player[slot];
+        
+        let newInventory = [...player.inventory];
+        newInventory.splice(index, 1);
+        if (currentEquipped) newInventory.push(currentEquipped);
+        
+        sfx.attack();
+        setPlayer(p => ({ ...p, [slot]: itemToEquip, inventory: newInventory }));
+        addLog(`Equipped ${itemToEquip.name}.`, '#60a5fa');
+      };
+
+      const unequipItem = (slot) => {
+        const currentEquipped = player[slot];
+        if (!currentEquipped) return;
+        if (player.inventory.length >= 10) { addLog("Bag is full! Cannot unequip.", "#ef4444"); return; }
+        
+        sfx.potion();
+        setPlayer(p => ({ ...p, [slot]: null, inventory: [...p.inventory, currentEquipped] }));
+        addLog(`Unequipped ${currentEquipped.name}.`, '#9ca3af');
+      };
+
+      const dropItem = (index) => {
+        const item = player.inventory[index];
+        let newInventory = [...player.inventory];
+        newInventory.splice(index, 1);
+        setPlayer(p => ({ ...p, inventory: newInventory }));
+        addLog(`Dropped ${item.name}.`, '#9ca3af');
+      };
+
+      const saveGame = () => {
+        try {
+          const saveData = { player, playerPos, treasures, logs, unaskedQuestions: unaskedQuestions.current, selectedGrade, selectedTopics, mistakeLog };
+          localStorage.setItem('retroHeroSave', JSON.stringify(saveData));
+          setHasSave(true); addLog("Game Saved Successfully!", "#4ade80");
+        } catch(e) { addLog("Error: Save blocked by browser settings.", "#ef4444"); }
+      };
+
+      const loadGame = () => {
+        getAudioCtx();
+        try {
+          const saved = localStorage.getItem('retroHeroSave');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (!parsed.player.startTime) parsed.player.startTime = Date.now();
+            if (!parsed.player.answers) parsed.player.answers = [];
+            setPlayer({ ...parsed.player, inventory: parsed.player.inventory || [] }); 
+            setPlayerPos(parsed.playerPos); posRef.current = parsed.playerPos;
+            setTreasures(parsed.treasures); setLogs(parsed.logs || []);
+            unaskedQuestions.current = parsed.unaskedQuestions || [];
+            setSelectedGrade(parsed.selectedGrade || 'P3'); setSelectedTopics(parsed.selectedTopics || []);
+            setMistakeLog(parsed.mistakeLog || []); 
+            setWorldMap(generateMap()); setGameState('EXPLORE');
+          }
+        } catch (e) { console.error("Failed to load save:", e); }
+      };
+
+      const triggerReset = () => setConfirmReset(true);
+      const executeReset = () => {
+        try { localStorage.removeItem('retroHeroSave'); } catch(e){}
+        setHasSave(false); setConfirmReset(false); setGameState('START'); setCurrentEnemy(null); setFightingEliteId(null); setPendingLoot(null); setLogs([]); setMistakeLog([]); setPlayerPos({ x: 15, y: 15 }); posRef.current = { x: 15, y: 15 };
+      };
+
       const renderMapTiles = () => {
+        if (!worldMap || worldMap.length === 0) return null; 
         const tiles = [];
-        const viewDist = 4; // 9x9 grid
-        for (let y = playerPos.y - viewDist; y <= playerPos.y + viewDist; y++) {
-          for (let x = playerPos.x - viewDist; x <= playerPos.x + viewDist; x++) {
+        for (let y = playerPos.y - 4; y <= playerPos.y + 4; y++) {
+          for (let x = playerPos.x - 4; x <= playerPos.x + 4; x++) {
             let wrappedX = ((x % MAP_SIZE) + MAP_SIZE) % MAP_SIZE;
             let wrappedY = ((y % MAP_SIZE) + MAP_SIZE) % MAP_SIZE;
             let tile = worldMap[wrappedY][wrappedX];
             
-            let bg = 'bg-black';
+            let bg = 'bg-black', icon = '';
             if (tile === '.') bg = 'terrain-grass';
             else if (tile === 'T') bg = 'terrain-forest';
             else if (tile === 'M') bg = 'terrain-mountain';
-            else if (tile === 'O') bg = 'terrain-path'; 
+            else if (tile === 'W') bg = 'bg-[#3a86ff]'; 
+            else if (tile === 'O') { bg = 'terrain-path'; icon = '🛖'; } 
+            else if (tile === 'D') bg = 'terrain-demon';
+            else if (tile === 'L') bg = 'terrain-lava';
             else if (tile === '~') bg = 'terrain-water';
+            else if (tile === 'B') { bg = 'terrain-demon'; icon = '🏰'; } 
+            else if (tile === 'i') { bg = 'terrain-path'; icon = '🪧'; }
+            else if (tile === 'C') { bg = 'terrain-cave'; icon = '🕳️'; } 
+            else if (tile === '_') bg = 'terrain-cave';
+            else if (tile === '1') { bg = 'terrain-cave'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🦖</span>; }
+            else if (tile === '2') { bg = 'terrain-demon'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🦍</span>; }
+            else if (tile === '3') { bg = 'terrain-forest'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🌳</span>; }
+            else if (tile === '4') { bg = 'terrain-mountain'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🗿</span>; }
+            else if (tile === '5') { bg = 'terrain-water'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🧜‍♀️</span>; }
+            else if (tile === '6') { bg = 'terrain-lava'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🦅</span>; }
+            else if (tile === 'X') { bg = 'terrain-grass'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🐉</span>; }
+            else if (tile === 'S') { bg = 'bg-purple-950'; icon = <span className="animate-pulse text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 0 10px rgba(255,0,255,0.8))' }}>🌌</span>; }
 
-            const isHero = (x === playerPos.x && y === playerPos.y);
-            const icon = isHero ? <HeroSprite tunicColor={CLASSES[player.charClass]?.color} /> : null;
+            if (treasures.find(t => t.x === wrappedX && t.y === wrappedY)) icon = <span className="text-3xl sm:text-4xl" style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}>🎁</span>;
+            if (x === playerPos.x && y === playerPos.y) icon = <HeroSprite tunicColor={CLASSES[player.charClass]?.color} boat={player.hasBoat && worldMap[wrappedY]?.[wrappedX] === '~'} />;
             
-            tiles.push(
-              <div key={`${x}-${y}`} className={`${bg}`} style={{ width:'11.1111%', height:'11.1111%', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                {icon}
-              </div>
-            );
+            tiles.push(<div key={`${x}-${y}`} className={`${bg}`} style={{ width:'11.1111%', height:'11.1111%', boxSizing:'border-box', display:'flex', alignItems:'center', justifyContent:'center' }}>{icon}</div>);
           }
         }
         return tiles;
       };
 
-      // --- RENDER MINI-MAP (Radar) ---
       const renderMiniMap = () => {
+        if (!worldMap || worldMap.length === 0) return null; 
         return (
           <div style={{ backgroundColor:'#0f172a', padding:'2px', display: 'flex', flexWrap:'wrap', width: '100%', height: '100px', border: '2px solid #475569', boxSizing:'border-box' }}>
             {worldMap.map((row, y) => row.map((tile, x) => {
@@ -369,62 +975,559 @@
               else if (tile === 'T') bg = '#166534';
               else if (tile === 'M') bg = '#78350f';
               else if (tile === '~') bg = '#3b82f6';
+              else if (tile === 'D') bg = '#7f1d1d';
+              else if (tile === 'L') bg = '#ef4444'; 
               else if (tile === 'O') bg = '#eab308';
-              return <div key={`${x}-${y}`} style={{ backgroundColor: bg, width: `${100/MAP_SIZE}%`, height: `${100/MAP_SIZE}%` }} />
+              else if (tile === 'i') bg = '#fef08a';
+              else if (tile === 'B') bg = '#dc2626';
+              else if (tile === 'S') bg = '#a855f7';
+              else if (['1','2','3','4','6','X'].includes(tile)) bg = '#f97316';
+              else if (tile === '5') bg = '#60a5fa';
+              else if (tile === '_' || tile === 'C') bg = '#374151';
+              return <div key={`${x}-${y}`} style={{ backgroundColor: bg, width: `${100/MAP_SIZE}%`, height: `${100/MAP_SIZE}%`, boxSizing:'border-box' }} />
             }))}
           </div>
         )
       };
 
-      const getPlayTime = () => {
-        const secs = Math.floor((Date.now() - player.startTime) / 1000);
-        return `${Math.floor(secs/60)}m ${secs%60}s`;
-      };
-
       return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', position: 'relative' }}>
-          {/* Mute Button */}
-          <button onClick={() => { setIsAudioMuted(toggleMute()); setForceRender(Math.random()); }} style={{ position:'absolute', top:'12px', left:'12px', zIndex:100, backgroundColor:'rgba(0,0,0,0.8)', padding:'8px', borderRadius:'50%', border:'2px solid #475569' }}>
-            {isMuted ? <VolumeXIcon size={20} className="text-red-500"/> : <Volume2Icon size={20} className="text-green-500"/>}
+          
+          <button onClick={() => { setIsAudioMuted(toggleMute()); setForceRender(Math.random()); }} style={{ position:'absolute', top:'12px', left:'12px', zIndex:100, backgroundColor:'rgba(0,0,0,0.8)', padding:'8px', borderRadius:'50%', border:'2px solid #475569', cursor:'pointer' }}>
+            {isAudioMuted ? <VolumeXIcon size={20} className="text-red-500"/> : <Volume2Icon size={20} className="text-green-500"/>}
           </button>
 
-          <div className="game-layout">
-            
-            {/* LEFT: Game Viewport */}
-            <div className={`game-viewport ${screenVfx==='flash-red'?'flash-red-screen':''}`}>
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start' }}>
-                {renderMapTiles()}
+          {/* MENU MODAL */}
+          {activeMenu && (
+            <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,0.85)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:110, padding: '16px' }}>
+              <div className="ui-panel flex flex-col" style={{ backgroundColor:'#0f172a', padding:'16px', width:'100%', maxWidth:'600px', maxHeight:'90vh' }}>
+                
+                <div style={{ display:'flex', gap:'8px', borderBottom:'2px solid #1e3a8a', paddingBottom:'12px', marginBottom:'16px' }}>
+                  <button onClick={() => setActiveMenu('INVENTORY')} className="pixel-font" style={{ flex:1, padding:'12px', fontSize:'12px', backgroundColor: activeMenu === 'INVENTORY' ? '#2563eb' : 'black', color:'white', border: activeMenu === 'INVENTORY' ? '2px solid white' : '2px solid #475569', cursor:'pointer' }}>🎒 BAG</button>
+                  <button onClick={() => setActiveMenu('MISTAKES')} className="pixel-font" style={{ flex:1, padding:'12px', fontSize:'12px', backgroundColor: activeMenu === 'MISTAKES' ? '#2563eb' : 'black', color:'white', border: activeMenu === 'MISTAKES' ? '2px solid white' : '2px solid #475569', cursor:'pointer' }}>📚 LOG</button>
+                  <button onClick={() => setActiveMenu('REPORT')} className="pixel-font" style={{ flex:1, padding:'12px', fontSize:'12px', backgroundColor: activeMenu === 'REPORT' ? '#2563eb' : 'black', color:'white', border: activeMenu === 'REPORT' ? '2px solid white' : '2px solid #475569', cursor:'pointer' }}>📊 REPORT</button>
+                </div>
+
+                {activeMenu === 'INVENTORY' && (
+                  <div className="scrollable custom-scroll" style={{ flex:1, overflowY:'auto' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'12px', border:'2px solid #475569', marginBottom:'16px' }}>
+                      <div style={{ color:'#f472b6', fontWeight:'bold', fontSize:'16px' }}>🧪 Potions: {player.potions}</div>
+                      <button onClick={usePotionOverworld} disabled={player.potions <= 0 || player.hp >= player.maxHp} className="pixel-btn" style={{ backgroundColor:'#ec4899', color:'white', fontSize:'12px', padding:'6px 12px', cursor:'pointer' }}>USE</button>
+                    </div>
+
+                    <h3 className="pixel-font" style={{ fontSize:'12px', color:'#fde047', marginBottom:'8px' }}>EQUIPPED:</h3>
+                    <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'16px' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #334155' }}>
+                        <div style={{ fontSize:'14px', color:'white' }}><span style={{color:'#9ca3af'}}>WPN:</span> {player.weapon ? `${player.weapon.name} (+${player.weapon.atk})` : 'None'}</div>
+                        {player.weapon && <button onClick={() => unequipItem('weapon')} style={{ backgroundColor:'#475569', color:'white', fontSize:'12px', padding:'4px 8px', border:'1px solid white', cursor:'pointer' }}>UNEQUIP</button>}
+                      </div>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #334155' }}>
+                        <div style={{ fontSize:'14px', color:'white' }}><span style={{color:'#9ca3af'}}>AMR:</span> {player.armor ? `${player.armor.name} (+${player.armor.def})` : 'None'}</div>
+                        {player.armor && <button onClick={() => unequipItem('armor')} style={{ backgroundColor:'#475569', color:'white', fontSize:'12px', padding:'4px 8px', border:'1px solid white', cursor:'pointer' }}>UNEQUIP</button>}
+                      </div>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #334155' }}>
+                        <div style={{ fontSize:'14px', color:'white' }}><span style={{color:'#9ca3af'}}>NCK:</span> {player.necklace ? `${player.necklace.name}` : 'None'}</div>
+                        {player.necklace && <button onClick={() => unequipItem('necklace')} style={{ backgroundColor:'#475569', color:'white', fontSize:'12px', padding:'4px 8px', border:'1px solid white', cursor:'pointer' }}>UNEQUIP</button>}
+                      </div>
+                    </div>
+
+                    <h3 className="pixel-font" style={{ fontSize:'12px', color:'#fde047', marginBottom:'8px' }}>BAG ({player.inventory.length}/10):</h3>
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+                      {Array(10).fill(0).map((_, i) => {
+                        const item = player.inventory[i];
+                        if (item) {
+                           return (
+                             <div key={i} style={{ backgroundColor:'black', border:'1px solid #475569', padding:'8px', display:'flex', flexDirection:'column' }}>
+                               <div style={{ fontWeight:'bold', fontSize:'14px', color:'white', marginBottom:'4px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{item.name}</div>
+                               <div style={{ fontSize:'12px', color:'#4ade80', marginBottom:'8px' }}>
+                                 {item.atk && `+${item.atk} ATK `}
+                                 {item.def && `+${item.def} DEF `}
+                                 {item.regen && `+${item.regen} Reg`}
+                               </div>
+                               <div style={{ display:'flex', gap:'4px', marginTop:'auto' }}>
+                                 <button onClick={()=>equipItemFromBag(i)} style={{ flex:1, backgroundColor:'#16a34a', color:'white', fontSize:'10px', padding:'4px', border:'1px solid white', cursor:'pointer' }}>EQUIP</button>
+                                 <button onClick={()=>dropItem(i)} style={{ flex:1, backgroundColor:'#991b1b', color:'white', fontSize:'10px', padding:'4px', border:'1px solid white', cursor:'pointer' }}>DROP</button>
+                               </div>
+                             </div>
+                           )
+                        } else {
+                           return <div key={i} style={{ backgroundColor:'black', border:'1px dashed #334155', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', color:'#64748b', fontSize:'12px', height:'80px' }}>EMPTY</div>
+                        }
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {activeMenu === 'MISTAKES' && (
+                  <div className="scrollable custom-scroll" style={{ flex:1, backgroundColor:'black', border:'2px solid #475569', padding:'12px', overflowY:'auto' }}>
+                    {mistakeLog.length === 0 ? (
+                      <p style={{ color:'#9ca3af', textAlign:'center', marginTop:'20px', fontSize:'14px' }}>No mistakes recorded yet! Great job!</p>
+                    ) : (
+                      mistakeLog.map((m, idx) => (
+                        <div key={idx} style={{ marginBottom:'12px', paddingBottom:'12px', borderBottom:'1px solid #334155' }}>
+                          <p style={{ color:'white', fontSize:'14px', fontWeight:'bold', marginBottom:'6px', lineHeight:1.4 }}>Q: {m.q}</p>
+                          <p style={{ color:'#f87171', fontSize:'12px', marginBottom:'4px' }}>❌ Your Answer: {m.chosen}</p>
+                          <p style={{ color:'#4ade80', fontSize:'12px' }}>✅ Correct Answer: {m.correct}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {activeMenu === 'REPORT' && (
+                  <div className="scrollable custom-scroll" style={{ flex:1, backgroundColor:'black', border:'2px solid #475569', padding:'12px', overflowY:'auto', display:'flex', flexDirection:'column' }}>
+                    {(() => {
+                      const playTimeSeconds = Math.floor((Date.now() - (player.startTime || Date.now())) / 1000);
+                      const mins = Math.floor(playTimeSeconds / 60);
+                      const secs = playTimeSeconds % 60;
+                      const timeString = `${mins}m ${secs}s`;
+                      
+                      let reportText = `--- HERO'S ASCENT REPORT ---\n`;
+                      reportText += `Name: ${player.name}\n`;
+                      reportText += `Class: ${player.charClass}\n`;
+                      reportText += `Level: ${player.level}\n`;
+                      reportText += `Time Played: ${timeString}\n\n`;
+                      
+                      reportText += `--- MISTAKES LOG ---\n`;
+                      if (mistakeLog.length === 0) {
+                        reportText += `No mistakes recorded. Excellent job!\n`;
+                      } else {
+                        mistakeLog.forEach((m, idx) => {
+                          reportText += `${idx + 1}. Q: ${m.q}\n   ❌ Student's Answer: ${m.chosen}\n\n`;
+                        });
+                      }
+                      
+                      const copyToClipboard = () => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = reportText;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        try {
+                          document.execCommand('copy');
+                          addLog("Report copied to clipboard!", "#4ade80");
+                        } catch (err) {
+                          addLog("Copy failed. Please manually select the text.", "#ef4444");
+                        }
+                        document.body.removeChild(textarea);
+                      };
+
+                      return (
+                        <React.Fragment>
+                          <p style={{ color: 'white', fontSize: '14px', marginBottom: '8px', fontFamily: 'sans-serif', fontWeight:'bold' }}>Teacher Export Data:</p>
+                          <textarea readOnly value={reportText} style={{ width: '100%', height: '200px', backgroundColor: '#0f172a', color: '#4ade80', fontSize: '12px', padding: '8px', border: '1px solid #334155', marginBottom: '12px', resize: 'none', fontFamily:'monospace' }} />
+                          <button onClick={copyToClipboard} className="pixel-btn" style={{ backgroundColor: '#16a34a', color: 'white', width: '100%', fontSize: '14px', marginTop:'auto', cursor:'pointer' }}>COPY REPORT</button>
+                        </React.Fragment>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                <button onClick={() => setActiveMenu(null)} className="pixel-btn" style={{ backgroundColor:'#475569', color:'white', marginTop:'16px', fontSize:'14px', width:'100%', flexShrink:0, cursor:'pointer' }}>CLOSE</button>
               </div>
             </div>
+          )}
 
-            {/* RIGHT: UI Sidebar */}
-            <div className="game-sidebar">
-              
-              {/* Top Buttons Row */}
-              <div style={{ display:'flex', gap:'8px', flexShrink:0 }}>
-                <button className="pixel-font" style={{ flex:1, backgroundColor:'#9333ea', color:'white', border:'2px solid white', padding:'8px', fontSize:'12px' }}>🎒 MENU</button>
-                <button className="pixel-font" style={{ flex:1, backgroundColor:'#2563eb', color:'white', border:'2px solid white', padding:'8px', fontSize:'12px' }}>💾 SAVE</button>
-                <div className="pixel-font" style={{ flex:1, backgroundColor:'black', color:'#facc15', border:'2px solid #475569', padding:'8px', fontSize:'10px', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  ⏱️ {getPlayTime()}
+          {/* RESET CONFIRMATION MODAL */}
+          {confirmReset && (
+            <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}>
+              <div className="bg-red-950 p-6 md:p-8 border-4 border-white ui-panel text-center max-w-sm w-full mx-4">
+                <h2 className="text-xl md:text-2xl text-yellow-300 pixel-font mb-4">RESET GAME?</h2>
+                <p className="text-sm md:text-base font-sans mb-6 text-white">All unsaved progress will be lost permanently.</p>
+                <div style={{ display:'flex', gap:'16px', justifyContent:'center' }}>
+                  <button onClick={executeReset} className="pixel-btn bg-red-600 hover:bg-red-500 text-sm">YES</button>
+                  <button onClick={() => setConfirmReset(false)} className="pixel-btn bg-gray-600 hover:bg-gray-500 text-sm">NO</button>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Stats Panel */}
-              <div className={`ui-panel ${screenVfx==='flash-green'?'flash-green-panel':''}`} style={{ backgroundColor:'#0f172a', padding:'16px', flexShrink:0 }}>
-                {/* Header */}
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', borderBottom:'2px solid #1e3a8a', paddingBottom:'8px', marginBottom:'16px' }}>
-                  <h3 className="pixel-font" style={{ fontSize:'16px', color:'#fde047' }}>{player.name}</h3>
-                  <span className="pixel-font" style={{ fontSize:'12px' }}>LV {player.level}</span>
-                </div>
+          {overlayVfx === 'heal' && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 vfx-heal font-bold font-sans" style={{ color:'#4ade80', fontSize:'5rem' }}>✨💚✨</div>}
+
+          {/* START SCREEN */}
+          {gameState === 'START' && (
+            <div className="scrollable" style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'16px', width:'100%', textAlign:'center' }}>
+              <h1 className="pixel-font text-yellow-400 drop-shadow-title" style={{ fontSize:'clamp(2.5rem, 6vw, 5rem)', marginBottom:'32px', lineHeight:1.2 }}>HERO'S<br/>ASCENT</h1>
+              <p className="pixel-font" style={{ color:'#9ca3af', fontSize:'clamp(10px, 2vw, 14px)', maxWidth:'600px', marginBottom:'48px', lineHeight:1.8 }}>Choose your Science level & topics. Slay the Demon King using the power of knowledge!</p>
+              <div style={{ display:'flex', flexDirection:'column', gap:'16px', width:'100%', maxWidth:'320px' }}>
+                <button onClick={startGame} className="pixel-btn animate-pulse" style={{ backgroundColor:'#dc2626', color:'white', fontSize:'1.5rem', padding:'16px', cursor:'pointer' }}>NEW GAME</button>
+                {hasSave && <button onClick={loadGame} className="pixel-btn" style={{ backgroundColor:'#2563eb', color:'white', fontSize:'1.5rem', padding:'16px', cursor:'pointer' }}>CONTINUE</button>}
+              </div>
+            </div>
+          )}
+
+          {/* CHARACTER CREATION */}
+          {gameState === 'CREATE' && (
+            <div className="scrollable" style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'16px', width:'100%', overflowY:'auto' }}>
+              <form onSubmit={createCharacter} className="ui-panel" style={{ backgroundColor:'#0f172a', padding:'24px', width:'100%', maxWidth:'600px', display:'flex', flexDirection:'column', gap:'12px' }}>
+                <h2 className="pixel-font text-center" style={{ color:'#facc15', fontSize:'1.5rem', marginBottom:'16px' }}>New Game</h2>
                 
-                {/* Bars */}
-                <div style={{ marginBottom:'12px' }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:'12px', fontWeight:'bold', marginBottom:'4px' }}><span>HP</span> <span>{player.hp}/{player.maxHp}</span></div>
-                  <div style={{ width:'100%', backgroundColor:'#1e293b', height:'12px' }}>
-                    <div style={{ backgroundColor:'#ef4444', height:'100%', width: `${(player.hp/player.maxHp)*100}%` }}></div>
+                <label className="pixel-font text-gray-300" style={{ fontSize:'12px' }}>Name</label>
+                <input name="name" defaultValue="Hero" maxLength={10} style={{ width:'100%', backgroundColor:'black', border:'2px solid #475569', padding:'12px', color:'white', textTransform:'uppercase', fontSize:'14px', marginBottom:'8px' }} />
+                
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:'16px', marginBottom:'8px' }}>
+                   <div>
+                      <label className="pixel-font text-gray-300 block mb-2" style={{ fontSize:'10px' }}>Max Syllabus Grade</label>
+                      <select name="quizLevel" value={selectedGrade} onChange={handleGradeChange} style={{ width:'100%', backgroundColor:'black', border:'2px solid #475569', padding:'12px', color:'white', textTransform:'uppercase', fontSize:'12px', cursor:'pointer' }}>
+                        <option value="P3">Primary 3</option>
+                        <option value="P4">Primary 4</option>
+                        <option value="P5">Primary 5</option>
+                        <option value="P6">Primary 6</option>
+                      </select>
+                   </div>
+                   <div>
+                      <label className="pixel-font text-gray-300 block mb-2" style={{ fontSize:'10px' }}>Select Topics</label>
+                      <div className="custom-scroll scrollable" style={{ backgroundColor:'black', border:'2px solid #475569', padding:'12px', height:'120px' }}>
+                         {availableGrades.slice(0, availableGrades.indexOf(selectedGrade) + 1).map(grade => (
+                            <div key={grade} style={{ marginBottom:'8px' }}>
+                               <div style={{ color:'#facc15', fontSize:'10px', fontWeight:'bold', marginBottom:'4px', textDecoration:'underline' }}>{grade} Topics</div>
+                               <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
+                                 {Object.keys(QUESTION_BANKS[grade] || {}).map(topic => {
+                                    const tId = `${grade}|${topic}`;
+                                    const isSelected = selectedTopics.includes(tId);
+                                    return (
+                                       <label key={tId} style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px', cursor:'pointer', padding:'4px', backgroundColor: isSelected ? '#dc2626' : '#1e293b', border: isSelected ? '1px solid #f87171' : '1px solid #334155', borderRadius:'4px' }}>
+                                          <input type="checkbox" checked={isSelected} onChange={() => { setSelectedTopics(prev => prev.includes(tId) ? prev.filter(t => t !== tId) : [...prev, tId]) }} style={{ cursor:'pointer' }} />
+                                          <span style={{ fontSize:'10px', color:'white', textTransform:'uppercase' }}>{topic}</span>
+                                       </label>
+                                    )
+                                 })}
+                               </div>
+                            </div>
+                         ))}
+                      </div>
+                   </div>
+                </div>
+
+                <button type="submit" disabled={selectedTopics.length === 0} className="pixel-btn w-full disabled:bg-gray-700 disabled:text-gray-400" style={{ backgroundColor:'#dc2626', color:'white', padding:'16px', fontSize:'1.2rem', marginTop:'8px', cursor:'pointer' }}>
+                  {selectedTopics.length === 0 ? "SELECT A TOPIC" : "ENTER WORLD"}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* GAME OVER / VICTORY */}
+          {(gameState === 'GAME_OVER' || gameState === 'VICTORY') && (
+            <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'16px', textAlign:'center', width:'100%' }}>
+              <h1 className={`pixel-font ${gameState==='VICTORY' ? 'text-yellow-400' : 'text-red-600'}`} style={{ fontSize:'clamp(3rem, 8vw, 6rem)', marginBottom:'24px' }}>{gameState === 'VICTORY' ? 'VICTORY!' : 'YOU DIED'}</h1>
+              <div style={{ fontSize:'clamp(6rem, 15vw, 12rem)', marginBottom:'32px' }}>{gameState === 'VICTORY' ? '🏆' : '💀'}</div>
+              {gameState === 'GAME_OVER' && <p className="pixel-font text-gray-400" style={{ fontSize:'12px', marginBottom:'32px', lineHeight:1.8 }}>Your experience remains, but half your gold was lost to the void.</p>}
+              <button onClick={() => gameState === 'VICTORY' ? triggerReset() : respawnPlayer()} className="pixel-btn" style={{ backgroundColor:'#475569', color:'white', padding:'16px', fontSize:'1.2rem', cursor:'pointer' }}>
+                {gameState === 'VICTORY' ? 'MAIN MENU' : 'RESPAWN'}
+              </button>
+            </div>
+          )}
+
+          {/* MAIN GAME VIEW (Matches Layout Image Exactly) */}
+          {['EXPLORE', 'TOWN', 'SHOP', 'MYSTICAL_SHOP', 'COMBAT', 'LOOT'].includes(gameState) && (
+            <div className="game-layout">
+              
+              {/* LEFT VIEWPORT */}
+              <div className={`game-viewport ${screenVfx==='flash-red'?'flash-red-screen':''} ${screenVfx==='double-yellow'?'vfx-double-yellow':''} ${screenVfx==='flash-ult'?'flash-ult-screen':''} ${screenVfx==='shake'?'animate-shake':''}`}>
+                
+                {/* EXPLORE VIEW */}
+                {['EXPLORE', 'LOOT'].includes(gameState) && (
+                  <React.Fragment>
+                    <div style={{ width: '100%', maxWidth: '75vh', margin: '0 auto', position: 'relative' }}>
+                      <div style={{ paddingBottom: '100%' }}></div>
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start' }}>
+                        {renderMapTiles()}
+                      </div>
+                    </div>
+                  </React.Fragment>
+                )}
+
+                {/* LOOT OVERLAY */}
+                {gameState === 'LOOT' && pendingLoot && (
+                  <div className="animate-zoom-in z-40" style={{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,0.85)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'16px' }}>
+                    <div className="scrollable" style={{ backgroundColor:'#0f172a', border:'4px solid #eab308', padding:'24px', width:'100%', maxWidth:'400px', textAlign:'center', boxShadow:'0 0 20px rgba(234,179,8,0.5)' }}>
+                      <SparklesIcon className="animate-bounce" size={48} style={{ color:'#facc15', margin:'0 auto 16px auto', display:'inline-block' }} />
+                      <h2 className="pixel-font" style={{ color:'#fde047', fontSize:'1.2rem', marginBottom:'24px' }}>ITEM FOUND!</h2>
+                      
+                      <div style={{ backgroundColor:'#000', padding:'16px', border:'2px solid #475569', marginBottom:'24px', textAlign:'left' }}>
+                        <p style={{ fontSize:'1.2rem', fontWeight:'bold', color:'white', marginBottom:'8px' }}>{pendingLoot.name}</p>
+                        {pendingLoot.atk && <p style={{ color:'#4ade80', fontWeight:'bold' }}>+{pendingLoot.atk} ATK</p>}
+                        {pendingLoot.def && <p style={{ color:'#60a5fa', fontWeight:'bold' }}>+{pendingLoot.def} DEF</p>}
+                        {pendingLoot.regen && <p style={{ color:'#f472b6', fontWeight:'bold' }}>+{pendingLoot.regen} HP Regen/turn</p>}
+                        
+                        {pendingLoot.hasRevive && <p style={{ color:'#facc15', fontSize:'12px', marginTop:'8px', fontWeight:'bold' }}>Effect: Auto-Revive once</p>}
+                        {pendingLoot.doubleUlt && <p style={{ color:'#c084fc', fontSize:'12px', marginTop:'8px', fontWeight:'bold' }}>Effect: Double Ultimate</p>}
+                        {pendingLoot.allowsUltEveryTurn && <p style={{ color:'#c084fc', fontSize:'12px', marginTop:'8px', fontWeight:'bold' }}>Effect: 0 CD Ultimate</p>}
+                        
+                        <div style={{ fontSize:'10px', color:'#9ca3af', marginTop:'16px', borderTop:'1px solid #334155', paddingTop:'8px' }}>
+                          CURRENT:<br/>
+                          {pendingLoot.type === 'weapon' ? (player.weapon ? `${player.weapon.name} (+${player.weapon.atk})` : 'None') : 
+                           pendingLoot.type === 'armor' ? (player.armor ? `${player.armor.name} (+${player.armor.def})` : 'None') : 
+                           (player.necklace ? `${player.necklace.name}` : 'None')}
+                        </div>
+                      </div>
+
+                      <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+                        <button onClick={() => handleLootDecision('TAKE')} disabled={player.inventory.length >= 10} className="pixel-btn disabled:opacity-50" style={{ backgroundColor:'#16a34a', color:'white', width:'100%', cursor:'pointer' }}>{player.inventory.length >= 10 ? 'BAG FULL' : 'TAKE ITEM'}</button>
+                        <button onClick={() => handleLootDecision('SCRAP')} className="pixel-btn" style={{ backgroundColor:'#475569', color:'white', width:'100%', cursor:'pointer' }}>SCRAP FOR GOLD</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TOWN VIEW */}
+                {gameState === 'TOWN' && (
+                  <div className="scrollable" style={{ textAlign:'center', width:'100%', padding:'16px' }}>
+                    <div style={{ fontSize:'8rem', marginBottom:'16px' }}>🛖</div>
+                    <h2 className="pixel-font" style={{ fontSize:'2rem', color:'#eab308', marginBottom:'32px', lineHeight:1.5 }}>Sanctuary<br/>Town</h2>
+                    <div style={{ display:'flex', flexDirection:'column', gap:'12px', width:'100%', maxWidth:'250px', margin:'0 auto' }}>
+                      <button onClick={() => { if(player.hp === player.maxHp) { addLog("Already full HP.", "#9ca3af"); return;} if(player.gold>=15){setPlayer({...player, hp:player.maxHp, gold:player.gold-15}); sfx.potion(); addLog("Rested at Inn.", "#4ade80");} else addLog("Not enough Gold.", "#ef4444"); }} className="pixel-btn" style={{ backgroundColor:'#15803d', color:'white', fontSize:'12px', cursor:'pointer' }}>Inn (15G)</button>
+                      <button onClick={() => { if(player.gold>=25){setPlayer({...player, potions:player.potions+1, gold:player.gold-25}); sfx.potion(); addLog("Bought Potion.", "#f472b6");} else addLog("Not enough Gold.", "#ef4444"); }} className="pixel-btn" style={{ backgroundColor:'#be185d', color:'white', fontSize:'12px', cursor:'pointer' }}>Potion (25G)</button>
+                      <button onClick={() => setGameState('SHOP')} className="pixel-btn" style={{ backgroundColor:'#a16207', color:'white', fontSize:'12px', cursor:'pointer' }}>Blacksmith</button>
+                      <button onClick={() => setGameState('EXPLORE')} className="pixel-btn" style={{ backgroundColor:'#475569', color:'white', fontSize:'12px', marginTop:'8px', cursor:'pointer' }}>Leave Town</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* SHOP VIEW */}
+                {gameState === 'SHOP' && (
+                  <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', padding:'24px' }}>
+                    <h2 className="pixel-font text-center" style={{ fontSize:'1.5rem', color:'#eab308', marginBottom:'24px' }}>Blacksmith</h2>
+                    <div className="scrollable custom-scroll" style={{ flex:1 }}>
+                      <div style={{ marginBottom:'24px' }}>
+                        <h3 style={{ fontSize:'12px', color:'#9ca3af', fontWeight:'bold', textTransform:'uppercase', borderBottom:'1px solid #475569', paddingBottom:'4px', marginBottom:'8px' }}>Weapons (ATK)</h3>
+                        {SHOP_ITEMS.weapons.map(w => (
+                          <div key={w.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #334155', marginBottom:'8px' }}>
+                            <div><div style={{ fontWeight:'bold', fontSize:'14px' }}>{w.name}</div><div style={{ fontSize:'10px', color:'#4ade80' }}>+{w.atk} ATK</div></div>
+                            <button onClick={()=>buyItem('weapon', w)} disabled={player.gold < w.cost || player.weapon?.name === w.name} className="pixel-btn" style={{ backgroundColor:'#1d4ed8', color:'white', fontSize:'10px', padding:'4px 8px', cursor:'pointer' }}>{w.cost}G</button>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ marginBottom:'24px' }}>
+                        <h3 style={{ fontSize:'12px', color:'#9ca3af', fontWeight:'bold', textTransform:'uppercase', borderBottom:'1px solid #475569', paddingBottom:'4px', marginBottom:'8px' }}>Armor (DEF)</h3>
+                        {SHOP_ITEMS.armors.map(a => (
+                          <div key={a.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #334155', marginBottom:'8px' }}>
+                            <div><div style={{ fontWeight:'bold', fontSize:'14px' }}>{a.name}</div><div style={{ fontSize:'10px', color:'#60a5fa' }}>+{a.def} DEF</div></div>
+                            <button onClick={()=>buyItem('armor', a)} disabled={player.gold < a.cost || player.armor?.name === a.name} className="pixel-btn" style={{ backgroundColor:'#1d4ed8', color:'white', fontSize:'10px', padding:'4px 8px', cursor:'pointer' }}>{a.cost}G</button>
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize:'12px', color:'#9ca3af', fontWeight:'bold', textTransform:'uppercase', borderBottom:'1px solid #475569', paddingBottom:'4px', marginBottom:'8px' }}>Necklaces</h3>
+                        {SHOP_ITEMS.necklaces.map(n => (
+                          <div key={n.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #334155', marginBottom:'8px' }}>
+                            <div><div style={{ fontWeight:'bold', fontSize:'14px' }}>{n.name}</div><div style={{ fontSize:'10px', color:'#f472b6' }}>+{n.regen} HP/turn</div></div>
+                            <button onClick={()=>buyItem('necklace', n)} disabled={player.gold < n.cost || player.necklace?.name === n.name} className="pixel-btn" style={{ backgroundColor:'#1d4ed8', color:'white', fontSize:'10px', padding:'4px 8px', cursor:'pointer' }}>{n.cost}G</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={() => setGameState('TOWN')} className="pixel-btn" style={{ backgroundColor:'#475569', color:'white', fontSize:'12px', width:'100%', maxWidth:'200px', margin:'16px auto 0 auto', cursor:'pointer' }}>Back</button>
+                  </div>
+                )}
+
+                {/* MYSTICAL SHOP VIEW */}
+                {gameState === 'MYSTICAL_SHOP' && (
+                  <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', padding:'24px', backgroundColor:'rgba(59,7,100,0.4)' }}>
+                    <div style={{ textAlign:'center', marginBottom:'16px' }}><SparklesIcon className="animate-pulse" size={48} style={{ color:'#c084fc', display:'inline-block' }}/></div>
+                    <h2 className="pixel-font" style={{ fontSize:'1.5rem', color:'#c084fc', textAlign:'center', marginBottom:'8px' }}>Mystical Shop</h2>
+                    <p style={{ fontSize:'12px', color:'#9ca3af', textAlign:'center', marginBottom:'24px' }}>"Bring me gold. Only then can you slay the King."</p>
+                    <div className="scrollable custom-scroll" style={{ flex:1 }}>
+                      <div style={{ marginBottom:'24px' }}>
+                        <h3 style={{ fontSize:'12px', color:'#fde047', fontWeight:'bold', textTransform:'uppercase', borderBottom:'1px solid #6b21a8', paddingBottom:'4px', marginBottom:'8px' }}>Key Items</h3>
+                        {MYSTICAL_ITEMS.keyItems.map(k => (
+                          <div key={k.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #581c87', marginBottom:'8px', boxShadow:'0 0 10px rgba(162,28,175,0.3)' }}>
+                            <div><div style={{ fontWeight:'bold', fontSize:'14px', color:'#93c5fd' }}>{k.name}</div><div style={{ fontSize:'10px', color:'#9ca3af' }}>{k.desc}</div></div>
+                            <button onClick={()=>buyItem('keyItem', k)} disabled={player.gold < k.cost || player.hasBoat} className="pixel-btn" style={{ backgroundColor:'#6b21a8', color:'white', fontSize:'10px', padding:'4px 8px', cursor:'pointer' }}>{player.hasBoat ? 'SOLD' : `${k.cost}G`}</button>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ marginBottom:'24px' }}>
+                        <h3 style={{ fontSize:'12px', color:'#fde047', fontWeight:'bold', textTransform:'uppercase', borderBottom:'1px solid #6b21a8', paddingBottom:'4px', marginBottom:'8px' }}>Legendary Gear</h3>
+                        {MYSTICAL_ITEMS.weapons.map(w => (
+                          <div key={w.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #581c87', marginBottom:'8px', boxShadow:'0 0 10px rgba(162,28,175,0.3)' }}>
+                            <div><div style={{ fontWeight:'bold', fontSize:'14px', color:'#d8b4fe' }}>{w.name}</div><div style={{ fontSize:'10px', color:'#4ade80' }}>+{w.atk} ATK</div></div>
+                            <button onClick={()=>buyItem('weapon', w)} disabled={player.gold < w.cost || player.weapon?.name === w.name} className="pixel-btn" style={{ backgroundColor:'#6b21a8', color:'white', fontSize:'10px', padding:'4px 8px', cursor:'pointer' }}>{w.cost}G</button>
+                          </div>
+                        ))}
+                        {MYSTICAL_ITEMS.armors.map(a => (
+                          <div key={a.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #581c87', marginBottom:'8px', boxShadow:'0 0 10px rgba(162,28,175,0.3)' }}>
+                            <div><div style={{ fontWeight:'bold', fontSize:'14px', color:'#93c5fd' }}>{a.name}</div><div style={{ fontSize:'10px', color:'#60a5fa' }}>+{a.def} DEF</div></div>
+                            <button onClick={()=>buyItem('armor', a)} disabled={player.gold < a.cost || player.armor?.name === a.name} className="pixel-btn" style={{ backgroundColor:'#6b21a8', color:'white', fontSize:'10px', padding:'4px 8px', cursor:'pointer' }}>{a.cost}G</button>
+                          </div>
+                        ))}
+                        {MYSTICAL_ITEMS.consumables.map(c => (
+                          <div key={c.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', backgroundColor:'black', padding:'8px', border:'1px solid #581c87', marginBottom:'8px', boxShadow:'0 0 10px rgba(162,28,175,0.3)' }}>
+                            <div><div style={{ fontWeight:'bold', fontSize:'14px', color:'#86efac' }}>{c.name}</div><div style={{ fontSize:'10px', color:'#9ca3af' }}>Full Heal + Potion</div></div>
+                            <button onClick={()=>buyItem('consumable', c)} disabled={player.gold < c.cost} className="pixel-btn" style={{ backgroundColor:'#6b21a8', color:'white', fontSize:'10px', padding:'4px 8px', cursor:'pointer' }}>{c.cost}G</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={() => setGameState('EXPLORE')} className="pixel-btn" style={{ backgroundColor:'#475569', color:'white', fontSize:'12px', width:'100%', maxWidth:'200px', margin:'16px auto 0 auto', cursor:'pointer' }}>Leave</button>
+                  </div>
+                )}
+
+                {/* COMBAT VIEW */}
+                {gameState === 'COMBAT' && currentEnemy && (
+                  <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', backgroundColor:'#000', fontFamily:'sans-serif', position:'relative' }}>
+                    
+                    {/* Top Status Bar (Hero) */}
+                    <div style={{ backgroundColor:'#1d4ed8', color:'white', padding:'12px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'3px solid white', zIndex:10, flexShrink:0 }}>
+                      <div>
+                          <h2 style={{ fontSize:'1.2rem', fontWeight:'900', fontStyle:'italic', color:'#fde047' }}>{player.name}</h2>
+                          <p style={{ fontSize:'12px', fontWeight:'bold', color:'#bfdbfe' }}>Lv {player.level} | {player.charClass}</p>
+                      </div>
+                      <div style={{ textAlign:'right' }}>
+                          <p style={{ fontSize:'14px', fontWeight:'900', color:'#fca5a5' }}>HP: {player.hp}/{player.maxHp}</p>
+                          <div style={{ width:'120px', height:'10px', backgroundColor:'#1e293b', border:'2px solid black', borderRadius:'999px', overflow:'hidden', display:'inline-block', marginTop:'4px' }}>
+                            <div style={{ height:'100%', backgroundColor:'#22c55e', transition:'width 0.3s', width: `${(player.hp/player.maxHp)*100}%` }} />
+                          </div>
+                      </div>
+                    </div>
+
+                    {/* Arena */}
+                    <div style={{ flex:1, position:'relative', padding:'16px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', overflow:'hidden' }}>
+                       {/* Enemy HP Box */}
+                       <div className="animate-slide-in-left" style={{ position:'absolute', top:'16px', left:'16px', backgroundColor:'white', border:'2px solid black', padding:'8px', borderRadius:'4px', boxShadow:'4px 4px 0 rgba(0,0,0,0.5)', minWidth:'120px', zIndex:10 }}>
+                          <h3 style={{ fontWeight:'900', fontSize:'14px', textTransform:'uppercase', color: getDifficultyColor(currentEnemy, player) }}>Wild {currentEnemy.name}</h3>
+                          <div style={{ width:'100%', height:'8px', backgroundColor:'#d1d5db', border:'1px solid black', borderRadius:'999px', marginTop:'4px', overflow:'hidden' }}>
+                             <div style={{ height:'100%', backgroundColor:'#ef4444', transition:'width 0.3s', width: `${(currentEnemy.hp/currentEnemy.maxHp)*100}%` }} />
+                          </div>
+                       </div>
+
+                       {/* Enemy Sprite */}
+                       <div className={`${enemyVfx==='vfx-faint-flash'?'vfx-faint-flash':''} ${currentEnemy.isDead ? 'vfx-death' : ''}`} style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'min(20vh, 160px)', filter:'drop-shadow(0 20px 20px rgba(0,0,0,0.4))' }}>
+                          {currentEnemy.icon}
+                          {overlayVfx === 'attack' && <div className="vfx-pop" style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:50, fontSize:'5rem', filter:'drop-shadow(2px 2px 2px rgba(0,0,0,0.3))' }}>💥</div>}
+                          {overlayVfx === 'ultimate' && <div className="vfx-ult" style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:50, fontSize:'7rem', filter:'drop-shadow(2px 2px 2px rgba(0,0,0,0.5))' }}>🌀</div>}
+                       </div>
+                    </div>
+
+                    {/* Bottom Action Menu */}
+                    <div style={{ backgroundColor:'white', borderTop:'3px solid white', padding:'16px', minHeight:'160px', position:'relative', zIndex:20, flexShrink:0, boxShadow:'inset 0 8px 0 rgba(0,0,0,0.1)' }}>
+                       {!showQuiz ? (
+                          <div style={{ height:'100%', display:'flex', flexDirection:'column', justifyContent:'center' }}>
+                             {isActionLocked ? (
+                                <p style={{ color:'black', fontWeight:'900', fontSize:'1.2rem', textAlign:'center' }}>
+                                   A wild {currentEnemy.name} appeared! ...
+                                </p>
+                             ) : (
+                                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', width:'100%', maxWidth:'400px', margin:'0 auto' }}>
+                                   <button onClick={() => { setQuizType('ATTACK'); triggerScienceChallenge(); }} style={{ backgroundColor:'#dc2626', color:'white', fontWeight:'900', textTransform:'uppercase', fontSize:'12px', padding:'12px', border:'2px solid black', cursor:'pointer', boxShadow:'4px 4px 0 black' }}>ATTACK</button>
+                                   <button onClick={() => { setQuizType('ULTIMATE_1'); setUltAnswers([]); triggerScienceChallenge(true); }} disabled={player.ultCooldown > 0} style={{ backgroundColor:'#7e22ce', color:'white', fontWeight:'900', fontSize:'12px', padding:'12px', border:'2px solid black', cursor: player.ultCooldown > 0 ? 'not-allowed' : 'pointer', boxShadow:'4px 4px 0 black', opacity: player.ultCooldown > 0 ? 0.5 : 1 }}>
+                                      ULTIMATE {player.ultCooldown > 0 ? `(CD: ${player.ultCooldown})` : ''}
+                                   </button>
+                                   <button onClick={()=>executeCombatAction('POTION')} disabled={player.potions<=0} style={{ backgroundColor:'#ec4899', color:'white', fontWeight:'900', textTransform:'uppercase', fontSize:'12px', padding:'12px', border:'2px solid black', cursor: player.potions<=0 ? 'not-allowed' : 'pointer', boxShadow:'4px 4px 0 black', opacity: player.potions<=0 ? 0.5 : 1 }}>POTION ({player.potions})</button>
+                                   <button onClick={()=>executeCombatAction('FLEE')} disabled={currentEnemy.isBoss} style={{ backgroundColor:'#475569', color:'white', fontWeight:'900', textTransform:'uppercase', fontSize:'12px', padding:'12px', border:'2px solid black', cursor: currentEnemy.isBoss ? 'not-allowed' : 'pointer', boxShadow:'4px 4px 0 black', opacity: currentEnemy.isBoss ? 0.5 : 1 }}>FLEE</button>
+                                </div>
+                             )}
+                          </div>
+                       ) : (
+                           <div className="scrollable custom-scroll" style={{ width:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-start', height:'100%', maxHeight:'30vh' }}>
+                               <div style={{ fontSize:'14px', fontFamily:'monospace', fontWeight:'bold', color:'white', marginBottom:'16px', backgroundColor:'#0f172a', padding:'16px', border:'2px solid white', textAlign:'left', width:'100%', boxShadow:'inset 0 0 8px rgba(0,0,0,0.5)', borderRadius:'4px', whiteSpace:'pre-wrap', flexShrink:0 }}>
+                                 {quizProblem.q}
+                               </div>
+                               <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:'8px', width:'100%' }}>
+                                  {quizProblem.options?.map(opt => (
+                                     <button key={opt} onClick={() => handleQuizAnswer(opt)} style={{ backgroundColor:'#e2e8f0', color:'#0f172a', border:'2px solid #1e3a8a', fontWeight:'bold', fontSize:'12px', padding:'12px', boxShadow:'2px 2px 0 #1e3a8a', cursor:'pointer', textAlign:'left' }}>
+                                       {opt}
+                                     </button>
+                                  ))}
+                               </div>
+                           </div>
+                       )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* RIGHT SIDEBAR: UI Elements exactly as the image */}
+              <div className="game-sidebar">
+                
+                {/* 1. Top Action Buttons */}
+                <div style={{ display:'flex', gap:'8px', flexShrink:0 }}>
+                  <button onClick={() => setActiveMenu('INVENTORY')} className="pixel-font" style={{ flex:1, backgroundColor:'#9333ea', color:'white', border:'2px solid white', padding:'8px 4px', fontSize:'10px', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', cursor:'pointer' }}>
+                    <span style={{color:'#f472b6'}}>🎒</span> MENU
+                  </button>
+                  <button onClick={saveGame} className="pixel-font" style={{ flex:1, backgroundColor:'#2563eb', color:'white', border:'2px solid white', padding:'8px 4px', fontSize:'10px', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px', cursor:'pointer' }}>
+                    <span style={{color:'#fca5a5'}}>💾</span> SAVE
+                  </button>
+                  <div className="pixel-font" style={{ flex:1, backgroundColor:'black', color:'#fde047', border:'2px solid #475569', padding:'8px 4px', fontSize:'10px', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px' }}>
+                    <span>⏱️</span> {(() => {
+                      const playTimeSeconds = Math.floor((Date.now() - (player.startTime || Date.now())) / 1000);
+                      const mins = Math.floor(playTimeSeconds / 60);
+                      const secs = playTimeSeconds % 60;
+                      return `${mins}m ${secs}s`;
+                    })()}
                   </div>
                 </div>
-                
-                <div style={{ marginBottom:'20px' }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:'12px', fontWeight:'bold', marginBottom:'4px' }}><span>EXP</span> <span>{player.exp}/{EXP_REQUIREMENTS[player.level]}</span></div>
-                  <div style={{ width:'100%', backgroundColor:'#1e293b', height:'12px' }}>
+
+                {/* 2. Stats Panel */}
+                <div className={`ui-panel ${screenVfx==='flash-green'?'flash-green-panel':''}`} style={{ backgroundColor:'#0f172a', padding:'16px', flexShrink:0, transition:'box-shadow 0.3s' }}>
+                  {/* Header */}
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', borderBottom:'2px solid #1e3a8a', paddingBottom:'8px', marginBottom:'16px' }}>
+                    <h3 className="pixel-font" style={{ fontSize:'16px', color:'#fde047', textTransform:'uppercase', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{player.name}</h3>
+                    <span className="pixel-font" style={{ fontSize:'12px' }}>LV {player.level}</span>
+                  </div>
+                  
+                  {/* Bars */}
+                  <div style={{ marginBottom:'12px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', fontSize:'12px', fontWeight:'bold', fontFamily:'sans-serif', marginBottom:'4px' }}><span>HP</span> <span>{player.hp}/{player.maxHp}</span></div>
+                    <div style={{ width:'100%', backgroundColor:'#1e293b', height:'12px' }}>
+                      <div style={{ backgroundColor:'#ef4444', height:'100%', transition:'width 0.3s', width: `${(player.hp/player.maxHp)*100}%` }}></div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom:'20px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', fontSize:'12px', fontWeight:'bold', fontFamily:'sans-serif', marginBottom:'4px' }}><span>EXP</span> <span>{player.exp}/{EXP_REQUIREMENTS[player.level] || (player.level*1000)}</span></div>
+                    <div style={{ width:'100%', backgroundColor:'#1e293b', height:'12px' }}>
+                      <div style={{ backgroundColor:'#000', height:'100%', transition:'width 0.3s', width: `${(player.exp/(EXP_REQUIREMENTS[player.level] || (player.level*1000)))*100}%` }}></div>
+                    </div>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', backgroundColor:'#1e293b', padding:'12px', fontSize:'14px', fontWeight:'bold', fontFamily:'sans-serif', marginBottom:'16px' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px' }}><span style={{color:'#9ca3af'}}>⚔️</span> {player.atk} {player.weapon && <span style={{color:'#4ade80', fontSize:'10px'}}>(+{player.weapon.atk})</span>}</div>
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px' }}><span style={{color:'#9ca3af'}}>🛡️</span> {player.def} {player.armor && <span style={{color:'#60a5fa', fontSize:'10px'}}>(+{player.armor.def})</span>}</div>
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px' }}><span style={{color:'#f472b6'}}>🧪</span> {player.potions}</div>
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px', color:'#facc15' }}>💰 {player.gold}</div>
+                  </div>
+
+                  {/* Equipment */}
+                  <div style={{ fontSize:'10px', textTransform:'uppercase', fontWeight:'bold', color:'#9ca3af', display:'flex', flexDirection:'column', gap:'6px' }}>
+                    <div>WEAPON: <span style={{ color: player.weapon ? "white" : "white" }}>{player.weapon ? player.weapon.name : 'NONE'}</span></div>
+                    <div>ARMOR: <span style={{ color: player.armor ? "white" : "white" }}>{player.armor ? player.armor.name : 'NONE'}</span></div>
+                    <div>NECK: <span style={{ color: player.necklace ? "white" : "white" }}>{player.necklace ? `${player.necklace.name}` : 'NONE'}</span></div>
+                  </div>
+                </div>
+
+                {/* 3. Log Panel */}
+                <div className="ui-panel custom-scroll scrollable" style={{ backgroundColor:'#000', padding:'12px', flex:1, minHeight:'120px', fontFamily:'sans-serif', fontSize:'13px', display:'flex', flexDirection:'column' }}>
+                  {logs.length === 0 ? <p style={{ color:'#eab308', fontStyle:'italic' }}>Welcome! You chose {player.selectedTopics.length} Science topic(s). Answer wisely to power your ultimate!</p> : 
+                    logs.map(log => <p key={log.id} style={{ color: log.color, marginBottom:'6px', wordBreak:'break-word', lineHeight:1.3 }}>{log.message}</p>)
+                  }
+                  <div ref={logEndRef} />
+                </div>
+
+                {/* 4. Controls Area (Radar + D-Pad) */}
+                <div style={{ flexShrink:0, transition:'opacity 0.3s', paddingBottom:'8px', display:'flex', flexDirection:'row', alignItems:'flex-start', justifyContent:'space-between', opacity: (['EXPLORE', 'LOOT'].includes(gameState) && !activeMenu) ? 1 : 0.2, pointerEvents: (['EXPLORE', 'LOOT'].includes(gameState) && !activeMenu) ? 'auto' : 'none' }}>
+                  
+                  {/* Radar */}
+                  <div style={{ width:'120px', display:'flex', flexDirection:'column', alignItems:'center' }}>
+                    <span style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'6px', letterSpacing:'1px', fontWeight:'bold' }}>RADAR</span>
+                    {renderMiniMap()}
+                  </div>
+
+                  {/* D-PAD */}
+                  <div className="d-pad-grid">
+                    <div/>
+                    <div onPointerDown={(e)=>{e.preventDefault(); move(0,-1);}} className="d-pad-btn"><ArrowUpIcon className="w-8 h-8"/></div>
+                    <div/>
+                    <div onPointerDown={(e)=>{e.preventDefault(); move(-1,0);}} className="d-pad-btn"><ArrowLeftIcon className="w-8 h-8"/></div>
+                    <div className="d-pad-center"></div>
+                    <div onPointerDown={(e)=>{e.preventDefault(); move(1,0);}} className="d-pad-btn"><ArrowRightIcon className="w-8 h-8"/></div>
+                    <div/>
+                    <div onPointerDown={(e)=>{e.preventDefault(); move(0,1);}} className="d-pad-btn"><ArrowDownIcon className="w-8 h-8"/></div>
+                    <div/>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
