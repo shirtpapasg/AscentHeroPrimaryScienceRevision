@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Retro Hero's Ascent: Science Edition</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="vendor/tailwindcss-3.4.17.js"></script>
+  
+  <!-- React & ReactDOM -->
+  <script crossorigin src="vendor/react.production.min_1.js"></script>
+  <script crossorigin src="vendor/react-dom.production.min_2.js"></script>
+  
+  <!-- Babel for in-browser JSX compilation -->
+  <script src="vendor/babel.min_3.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #030712;
+      color: white;
+      overflow: hidden;
+      font-family: monospace;
+      -webkit-text-size-adjust: 100%; 
+      touch-action: none; -webkit-touch-callout: none;
+      -webkit-user-select: none; user-select: none;
+    }
+
+    /* --- BULLETPROOF GAME LAYOUT --- */
+    .game-layout {
+      display: flex; flex-direction: column; width: 100%; height: 100%;
+      padding: 10px; gap: 10px; box-sizing: border-box; overflow: hidden;
+    }
+    
+    .game-viewport {
+      flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background-color: #111827; position: relative; overflow: hidden;
+      border: 4px solid white; box-shadow: 4px 4px 0px black; border-radius: 8px;
+      min-width: 0; min-height: 0; 
+    }
+
+    .game-sidebar {
+      display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; width: 100%; min-height: 0;
+    }
+
+    @media (min-width: 1024px) {
+      .game-layout { flex-direction: row; padding: 20px; gap: 20px; justify-content: center; max-width: 1400px; margin: 0 auto; }
+      .game-sidebar { width: 400px; height: 100%; }
+    }
+
+    .pixel-font { font-family: 'Press Start 2P', monospace; letter-spacing: 1px; }
+    .monster-font { font-family: 'Nunito', sans-serif; }
+
+    .pixel-btn {
+      padding: 0.75rem 1.5rem; border: 4px solid #000;
+      box-shadow: inset -3px -3px 0px rgba(0,0,0,0.4), inset 3px 3px 0px rgba(255,255,255,0.4);
+      font-weight: bold; text-transform: uppercase; transition: all 0.1s; cursor: pointer;
+    }
+
+    .pixel-btn:active:not(:disabled) {
+      box-shadow: inset 3px 3px 0px rgba(0,0,0,0.4), inset -3px -3px 0px rgba(255,255,255,0.4);
+      transform: translateY(2px);
+    }
+
+    .pixel-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(100%); }
+    .pixel-panel { border: 4px solid #fff; box-shadow: 4px 4px 0px #000; }
+
+    .custom-scroll::-webkit-scrollbar { width: 8px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #111; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #666; border-radius: 4px; }
+    
+    .scrollable { touch-action: pan-y !important; overscroll-behavior-y: contain; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .d-pad-btn { touch-action: none; }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      20% { transform: translate(-5px, 0px) rotate(2deg); }
+      40% { transform: translate(2px, -2px) rotate(1deg); }
+      60% { transform: translate(-5px, 2px) rotate(0deg); }
+      80% { transform: translate(-2px, -2px) rotate(2deg); }
+      100% { transform: translate(2px, -4px) rotate(-1deg); }
+    }
+    .animate-shake { animation: shake 0.6s ease-in-out; }
+
+    @keyframes flashRed { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(220, 38, 38, 0.5); } }
+    .flash-red-screen { animation: flashRed 0.6s ease-out; }
+    
+    @keyframes flashYellowDouble { 0%, 100% { background-color: transparent; } 25% { background-color: rgba(253, 224, 71, 0.4); } 50% { background-color: transparent; } 75% { background-color: rgba(253, 224, 71, 0.4); } }
+    .vfx-double-yellow { animation: flashYellowDouble 0.8s ease-out; }
+
+    @keyframes flashGreen { 0%, 100% { box-shadow: 4px 4px 0px #000; } 50% { box-shadow: 0px 0px 20px 5px rgba(34, 197, 94, 0.8); } }
+    .flash-green-panel { animation: flashGreen 1.0s; }
+
+    @keyframes flashUlt { 0%, 100% { filter: invert(0); } 50% { filter: invert(1); } }
+    .flash-ult-screen { animation: flashUlt 0.6s 2; }
+
+    @keyframes popEffect { 0% { transform: scale(0.5); opacity: 1; } 50% { transform: scale(2); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+    .vfx-pop { animation: popEffect 0.6s ease-out forwards; pointer-events: none; }
+
+    @keyframes ultEffect { 0% { transform: scale(0.1) rotate(0deg); opacity: 1; filter: hue-rotate(0deg); } 50% { transform: scale(4) rotate(180deg); opacity: 1; filter: hue-rotate(180deg); } 100% { transform: scale(6) rotate(360deg); opacity: 0; filter: hue-rotate(360deg); } }
+    .vfx-ult { animation: ultEffect 1.4s ease-out forwards; pointer-events: none; }
+
+    @keyframes healEffect { 0% { transform: translateY(20px) scale(0.8); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
+    .vfx-heal { animation: healEffect 1.6s ease-out forwards; pointer-events: none; }
+
+    @keyframes clawEffect { 0% { transform: translate(50px, -50px) scale(2); opacity: 0; } 20% { opacity: 1; } 80% { transform: translate(-50px, 50px) scale(2.5); opacity: 1; } 100% { transform: translate(-50px, 50px) scale(2.5); opacity: 0; } }
+    .vfx-claw { animation: clawEffect 0.6s ease-out forwards; text-shadow: 4px 4px 0 #000; pointer-events: none; }
+
+    @keyframes deathEffect {
+      0% { filter: grayscale(0%); opacity: 1; transform: scale(1) translateY(0); }
+      40% { filter: grayscale(100%); opacity: 0.8; transform: scale(0.9) translateY(10px); }
+      100% { filter: grayscale(100%); opacity: 0; transform: scale(0.5) translateY(50px); }
+    }
+    .vfx-death { animation: deathEffect 1.5s ease-out forwards; pointer-events: none; }
+    
+    @keyframes faintFlash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2) contrast(1.2); } }
+    .vfx-faint-flash { animation: faintFlash 0.3s ease-out; }
+
+    /* --- PROFESSIONAL JRPG TERRAIN TEXTURES --- */
+    .terrain-grass { background-color: #63d13e; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='2' height='2' x='2' y='2' fill='%236bdb5c'/%3E%3Crect width='2' height='2' x='10' y='10' fill='%234da844'/%3E%3C/svg%3E"); }
+    .terrain-forest { background-color: #166e16; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%231e8c20'/%3E%3Ccircle cx='4' cy='4' r='4' fill='%2325ad27'/%3E%3Ccircle cx='12' cy='12' r='5' fill='%231a7a1c'/%3E%3C/svg%3E"); box-shadow: inset 0 0 4px rgba(0,0,0,0.3); }
+    .terrain-mountain { background-color: #7a5c33; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpolygon points='8,0 16,16 0,16' fill='%239e7642'/%3E%3Cpolygon points='8,0 16,16 8,16' fill='%23634824'/%3E%3C/svg%3E"); }
+    .terrain-water { background-color: #1c52c2; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 4 Q 4 0 8 4 T 16 4' stroke='%233878f7' fill='none' stroke-width='1'/%3E%3Cpath d='M0 12 Q 4 8 8 12 T 16 12' stroke='%231342a3' fill='none' stroke-width='1'/%3E%3C/svg%3E"); animation: wave-flow 4s linear infinite; }
+    @keyframes wave-flow { 0% { background-position: 0 0; } 100% { background-position: 0 16px; } }
+    .terrain-lava { background-color: #cc1b1b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 4 Q 4 0 8 4 T 16 4' stroke='%23ff7b00' fill='none' stroke-width='2'/%3E%3Cpath d='M0 12 Q 4 8 8 12 T 16 12' stroke='%23940c0c' fill='none' stroke-width='2'/%3E%3C/svg%3E"); animation: lava-pulse 2s infinite alternate; }
+    @keyframes lava-pulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.3); } }
+    .terrain-demon { background-color: #4a1010; background-image: radial-gradient(#300808 25%, transparent 25%); background-size: 12px 12px; }
+    .terrain-cave { background-color: #2a2a2a; background-image: radial-gradient(#111 20%, transparent 21%); background-size: 8px 8px; }
+    .terrain-path { background-color: #d1a569; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='2' height='2' x='4' y='4' fill='%23e6bc81'/%3E%3Crect width='2' height='2' x='12' y='8' fill='%23b88c51'/%3E%3C/svg%3E"); }
+    
+    #sls-loader { position: fixed; inset: 0; background-color: #030712; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fbbf24; font-family: 'Press Start 2P', monospace; z-index: 9999; }
+    @keyframes fast-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
+    .loader-icon { font-size: 3rem; animation: fast-pulse 0.8s infinite; margin-bottom: 20px; }
+  </style>
+
+  <script>
+    window.addEventListener('error', function(e) {
+      var loader = document.getElementById('sls-loader');
+      if (loader) loader.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px; line-height:1.5;"><b>Error Loading Game</b><br/><br/>The environment might be blocking local storage or scripts.<br/><br/><span style="font-size:10px;">' + e.message + '</span></div>';
+    });
+    setTimeout(function() {
+      var loader = document.getElementById('sls-loader');
+      if (loader && loader.style.display !== 'none' && loader.innerHTML.indexOf('Error') === -1) {
+         loader.innerHTML += '<br/><br/><div style="font-size:10px; color:#9ca3af; text-align:center;">Compiling... please wait.</div>';
+      }
+    }, 3000);
+  </script>
+</head>
+<body>
+  
+  <div id="sls-loader"><div class="loader-icon">⏳</div><div style="font-size: 12px; letter-spacing: 2px;">LOADING ENGINE...</div></div>
+  <div id="root" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; overflow: hidden;"></div>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    class ErrorBoundary extends React.Component {
+      constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+      static getDerivedStateFromError(error) { return { hasError: true, error }; }
+      componentDidCatch(error, errorInfo) { console.error("Game Crashed:", error, errorInfo); }
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div style={{ padding: '20px', color: 'white', backgroundColor: '#030712', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+              <h2 style={{ color: '#ef4444', fontSize: '24px', marginBottom: '16px', fontFamily: '"Press Start 2P", monospace' }}>SYSTEM ERROR</h2>
+              <p style={{ marginBottom: '24px', color: '#9ca3af', fontFamily: 'monospace' }}>A critical error occurred. Your browser might be blocking local storage.</p>
+              <pre style={{ fontSize: '10px', color: '#fca5a5', maxWidth: '80%', overflowX: 'auto', marginBottom: '24px' }}>{this.state.error && this.state.error.toString()}</pre>
+              <button onClick={() => { try { localStorage.removeItem('retroHeroSave'); } catch(e){} window.location.reload(); }} style={{ padding: '16px 32px', backgroundColor: '#dc2626', color: 'white', border: '4px solid white', fontWeight: 'bold', fontFamily: '"Press Start 2P", monospace', cursor: 'pointer' }}>CLEAR SAVE & RESTART</button>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
+    // --- INLINE SVG ICONS ---
+    const Volume2Icon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>;
+    const VolumeXIcon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>;
+    const ArrowUpIcon = ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>;
+    const ArrowDownIcon = ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
+    const ArrowLeftIcon = ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>;
+    const ArrowRightIcon = ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>;
+    const SparklesIcon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>;
+    const ZapIcon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>;
+    const SwordIcon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="14.5" y1="17.5" x2="3" y2="6"></line><line x1="9" y1="15" x2="15" y2="9"></line><line x1="15" y1="21" x2="21" y2="15"></line><line x1="21" y1="3" x2="15" y2="9"></line></svg>;
+    const ShieldIcon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>;
+    const FlaskConicalIcon = ({size, className, style}) => <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2v7.31"></path><path d="M14 9.3V1.99"></path><path d="M8.5 2h7"></path><path d="M14 9.3a6.5 6.5 0 1 1-4 0"></path><path d="M5.52 16h12.96"></path></svg>;
+
+    // --- Audio ---
+    let audioCtx = null;
+    let bgmInterval = null;
+    let isMuted = false;
+
+    const getAudioCtx = () => {
+      try {
+        if (typeof window === 'undefined') return null;
+        if (!audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) audioCtx = new AudioContext();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume().catch(() => {}); }
+        return audioCtx;
+      } catch (err) { return null; }
+    };
+
+    const toggleMute = () => { isMuted = !isMuted; return isMuted; };
+
+    const playTone = (freq, type, duration, vol = 0.1, slideFreq = null) => {
+      if (isMuted) return;
+      try {
+        const ctx = getAudioCtx(); if (!ctx) return;
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.type = type; osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        if (slideFreq) osc.frequency.exponentialRampToValueAtTime(slideFreq, ctx.currentTime + duration);
+        gain.gain.setValueAtTime(vol, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    };
+
+    const sfx = {
+      attack: () => playTone(400, 'square', 0.2, 0.1, 80),
+      potion: () => playTone(250, 'sine', 0.5, 0.1, 600),
+      treasure: () => { playTone(400, 'square', 0.15, 0.05, 600); setTimeout(() => playTone(600, 'square', 0.2, 0.05, 900), 150); },
+      defeat: () => playTone(100, 'sawtooth', 1.0, 0.15, 30),
+      flee: () => { playTone(400, 'square', 0.15, 0.05, 600); setTimeout(() => playTone(300, 'square', 0.15, 0.05, 500), 150); },
+      levelUp: () => { playTone(196.00, 'square', 0.3); setTimeout(() => playTone(261.63, 'square', 0.3), 300); setTimeout(() => playTone(329.63, 'square', 0.8), 600); },
+      ultimate: () => { playTone(150, 'sawtooth', 1.0, 0.2, 600); setTimeout(() => playTone(200, 'sawtooth', 1.0, 0.2, 800), 100); }
+    };
+
+    const playMusic = (trackType) => {
+      if (bgmInterval) clearInterval(bgmInterval);
+      let step = 0; let speed = 450; let notes = [73.4, 110.0, 146.8, 174.6, 146.8, 110.0]; let type = 'triangle'; let vol = 0.05;
+      if (trackType === 'combat') { speed = 130; notes = [392.0, 523.25, 659.25, 523.25, 783.99, 659.25]; type = 'square'; vol = 0.03; } 
+      else if (trackType === 'boss') { speed = 400; notes = [32.7, 32.7, 36.7, 32.7, 49.0, 32.7]; type = 'sawtooth'; vol = 0.06; }
+      bgmInterval = setInterval(() => { if (!isMuted) playTone(notes[step % notes.length], type, speed / 1000 + 0.1, vol); step++; }, speed);
+    };
+    const stopMusic = () => { if (bgmInterval) clearInterval(bgmInterval); };
+
+    // --- EXPANDED QUESTION BANKS ---
+    const QUESTION_BANKS = {
+      P3: {
+        "Diversity (Living/Non-Living & Materials)": [
+          { q: "Which of the following shows that living things respond to changes?", options: ["A millipede rolling up when touched.", "A young plant growing taller.", "A bird laying eggs.", "A tiger eating meat."], correct: "A millipede rolling up when touched." },
+          { q: "What do all living things need to survive?", options: ["Air, food, and water.", "Sunlight, soil, and water.", "Air, shelter, and meat.", "Water, shelter, and soil."], correct: "Air, food, and water." },
+          { q: "How are plants different from animals?", options: ["Plants can make their own food, but animals cannot.", "Plants need air, but animals do not.", "Plants cannot grow, but animals can.", "Plants do not reproduce, but animals do."], correct: "Plants can make their own food, but animals cannot." },
+          { q: "Which animal breathes through gills and has scales?", options: ["Fish", "Amphibian", "Reptile", "Mammal"], correct: "Fish" },
+          { q: "Which animal group has a body covering of hair or fur?", options: ["Mammals", "Birds", "Reptiles", "Amphibians"], correct: "Mammals" },
+          { q: "What is the main characteristic of insects?", options: ["They have six legs and three body parts.", "They have eight legs.", "They live in the water.", "They have scales."], correct: "They have six legs and three body parts." },
+          { q: "How do fungi like mould and mushrooms reproduce?", options: ["By spores", "By seeds", "By budding", "By laying eggs"], correct: "By spores" },
+          { q: "Where do fungi get their food from?", options: ["From the living or dead things they grow on.", "They make their own food using sunlight.", "They hunt insects.", "They absorb it from the air."], correct: "From the living or dead things they grow on." },
+          { q: "Which material is waterproof and best for making an umbrella?", options: ["Plastic", "Wood", "Paper", "Cotton"], correct: "Plastic" },
+          { q: "Why is glass used to make window panes?", options: ["It is transparent.", "It is flexible.", "It is magnetic.", "It absorbs water."], correct: "It is transparent." },
+          { q: "Study the table: Material A absorbs 0ml water. Material B absorbs 50ml. Material C absorbs 10ml. Which is best for a raincoat?", options: ["Material A", "Material B", "Material C", "None of the above"], correct: "Material A" },
+          { q: "A bar graph shows Animal X has 6 legs, Animal Y has 8 legs, and Animal Z has 0 legs. Which animal is likely an insect?", options: ["Animal X", "Animal Y", "Animal Z", "None of them"], correct: "Animal X" },
+          { q: "Ali sets up an experiment placing Material X in water. He measures its mass before and after. What property is he testing?", options: ["Whether it is waterproof (absorbs water)", "Whether it is flexible", "Whether it is transparent", "Whether it is magnetic"], correct: "Whether it is waterproof (absorbs water)" },
+          { q: "Data Table - Flexibility: Metal Ruler (No), Plastic Ruler (Yes), Wooden Ruler (No). What conclusion can be drawn?", options: ["Only the plastic ruler can bend without breaking.", "All rulers break easily.", "Wood is the strongest material.", "Metal is flexible."], correct: "Only the plastic ruler can bend without breaking." },
+          { q: "What is the definition of a 'transparent' material?", options: ["A material that allows most light to pass through.", "A material that blocks all light.", "A material that absorbs water.", "A material that bends easily."], correct: "A material that allows most light to pass through." },
+          { q: "An experiment uses 4 strings made of different materials to hang weights until they snap. What is the changed variable?", options: ["The material of the string", "The weight added", "The length of the string", "The thickness of the string"], correct: "The material of the string" },
+          { q: "To ensure a fair test when testing the strength of different papers, which variable must be kept constant?", options: ["The size and thickness of the papers", "The type of paper", "The person doing the experiment", "The room temperature"], correct: "The size and thickness of the papers" },
+          { q: "A graph shows the growth of a seedling over 5 days: Day 1 (1cm), Day 3 (4cm), Day 5 (8cm). What characteristic of living things does this show?", options: ["Living things grow.", "Living things respond to changes.", "Living things reproduce.", "Living things need air."], correct: "Living things grow." }
+        ],
+        "Systems (Plant & Human)": [
+          { q: "Which body system transports blood around the human body?", options: ["Circulatory System", "Digestive System", "Respiratory System", "Skeletal System"], correct: "Circulatory System" },
+          { q: "Which plant part holds the plant firmly to the ground?", options: ["Roots", "Stem", "Leaves", "Flowers"], correct: "Roots" },
+          { q: "What connects bones together to allow movement?", options: ["Joints", "Muscles", "Veins", "Skin"], correct: "Joints" },
+          { q: "Which body system gives the human body its shape?", options: ["Skeletal System", "Muscular System", "Digestive System", "Respiratory System"], correct: "Skeletal System" },
+          { q: "Which part of the plant makes food?", options: ["Leaves", "Roots", "Stem", "Flowers"], correct: "Leaves" },
+          { q: "What is the main function of the human respiratory system?", options: ["To take in oxygen and remove carbon dioxide.", "To digest food.", "To pump blood.", "To support the body."], correct: "To take in oxygen and remove carbon dioxide." },
+          { q: "In an experiment, a plant's roots were cut off. After 2 days, it withered. What does this prove?", options: ["Roots take in water for the plant.", "Roots make food.", "Leaves take in water.", "Stems absorb sunlight."], correct: "Roots take in water for the plant." },
+          { q: "Data: A chart shows 'Food enters X -> Travels down Y -> Digested in Z'. What is Z?", options: ["Stomach", "Mouth", "Gullet", "Large Intestine"], correct: "Stomach" },
+          { q: "Which definition best describes the 'digestive system'?", options: ["A system that breaks down food into simple substances for the body to absorb.", "A system that pumps blood.", "A system that takes in air.", "A framework of bones."], correct: "A system that breaks down food into simple substances for the body to absorb." },
+          { q: "A graph tracks heart rate during exercise. At Min 0 (70 bpm), Min 10 (120 bpm). Why does heart rate increase?", options: ["To pump blood carrying oxygen and food faster to the muscles.", "To digest food faster.", "To cool the body down.", "To absorb more water."], correct: "To pump blood carrying oxygen and food faster to the muscles." },
+          { q: "Experimental setup: A white flower is placed in red colored water. After 1 day, the petals turn red. What does this show?", options: ["The stem transports water to the flower.", "The flower makes red food.", "The roots are no longer working.", "Water evaporates from leaves."], correct: "The stem transports water to the flower." },
+          { q: "Which variable must be kept constant if testing which liquid fertilizer helps plants grow tallest?", options: ["The type of plant and amount of sunlight.", "The type of fertilizer.", "The day the plants are measured.", "The color of the pots."], correct: "The type of plant and amount of sunlight." }
+        ],
+        "Interactions (Magnets)": [
+          { q: "Which of the following is a magnetic material?", options: ["Steel", "Copper", "Aluminum", "Wood"], correct: "Steel" },
+          { q: "Where is the magnetic pull of a bar magnet the strongest?", options: ["At its poles", "At its center", "On its sides", "It is equal everywhere"], correct: "At its poles" },
+          { q: "What happens when the North pole of a magnet faces the South pole of another?", options: ["They attract.", "They repel.", "Nothing happens.", "They lose magnetism."], correct: "They attract." },
+          { q: "What happens when the North pole of a magnet faces the North pole of another?", options: ["They repel.", "They attract.", "Nothing happens.", "They explode."], correct: "They repel." },
+          { q: "How can you make a temporary magnet using an iron nail?", options: ["Stroke it with a magnet in one direction.", "Rub two nails together.", "Hit it with a hammer.", "Heat it over a fire."], correct: "Stroke it with a magnet in one direction." },
+          { q: "Data Table: Magnet A attracts 10 pins. Magnet B attracts 2 pins. Magnet C attracts 15 pins. Which is the strongest?", options: ["Magnet C", "Magnet A", "Magnet B", "They are equal"], correct: "Magnet C" },
+          { q: "An experiment is conducted to test the magnetic strength of a magnet. A sheets of paper is added between a magnet and a paperclip one at a time. What is the measured variable?", options: ["The number of paper sheets", "The size of the magnet", "The type of paperclip", "The room temperature"], correct: "The number of paper sheets" },
+          { q: "A graph shows magnetic strength dropping to zero as the magnet is heated over a flame. What is the conclusion?", options: ["Heating a magnet causes it to lose its magnetism.", "Heat makes magnets stronger.", "Magnets melt easily.", "Fire is a magnetic material."], correct: "Heating a magnet causes it to lose its magnetism." },
+          { q: "To fairly test if a U-shaped magnet is stronger than a Bar magnet, what must be kept the same?", options: ["The distance between the magnet and the iron nails.", "The shape of the magnets.", "The color of the magnets.", "The person holding them."], correct: "The distance between the magnet and the iron nails." },
+          { q: "What is the definition of 'repel' in magnetism?", options: ["To push away from each other.", "To pull towards each other.", "To stick together permanently.", "To lose magnetic force."], correct: "To push away from each other." }
+        ]
+      },
+      P4: {
+        "Cycles (Matter)": [
+          { q: "Which correctly identifies the stages of a mosquito's life cycle?", options: ["Egg -> Larva -> Pupa -> Adult", "Egg -> Pupa -> Larva -> Adult", "Egg -> Nymph -> Adult -> Pupa", "Egg -> Larva -> Adult"], correct: "Egg -> Larva -> Pupa -> Adult" },
+          { q: "What property of matter does a syringe filled with air prove when compressed?", options: ["Gas can be compressed.", "Gas has a definite shape.", "Gas has a definite mass.", "Gas expands when heated."], correct: "Gas can be compressed." },
+          { q: "What is the definition of 'volume' in matter?", options: ["The amount of space an object occupies.", "The amount of matter in an object.", "The gravitational pull on an object.", "The ability to do work."], correct: "The amount of space an object occupies." },
+          { q: "Which state of matter has a definite volume but no definite shape?", options: ["Liquid", "Solid", "Gas", "Plasma"], correct: "Liquid" },
+          { q: "Which of the following has mass and occupies space?", options: ["Air", "Heat", "Light", "Shadow"], correct: "Air" },
+          { q: "Which animal has a 3-stage life cycle?", options: ["Cockroach", "Butterfly", "Mosquito", "Beetle"], correct: "Cockroach" },
+          { q: "Data Table: Animal X's life cycle stages last - Egg (3 days), Larva (10 days), Pupa (4 days). How long before it becomes an adult?", options: ["17 days", "13 days", "14 days", "10 days"], correct: "17 days" },
+          { q: "Experiment: A rock is lowered into a measuring cylinder with 50ml of water. The water level rises to 70ml. What is the rock's volume?", options: ["20ml", "70ml", "50ml", "120ml"], correct: "20ml" },
+          { q: "A graph plots the mass of a seed as it germinates. The seed leaves lose mass over 5 days. Why?", options: ["The seed leaves provide food for the growing seedling.", "The seed is dying.", "Water is evaporating from the seed.", "The roots are eating the leaves."], correct: "The seed leaves provide food for the growing seedling." },
+          { q: "If you want to test whether air has mass, what equipment should you use?", options: ["Two identical balloons and a balance scale.", "A beaker and a measuring cylinder.", "A thermometer and hot water.", "A magnet and iron nails."], correct: "Two identical balloons and a balance scale." },
+          { q: "What defines 'Matter'?", options: ["Anything that has mass and occupies space.", "Anything that produces light and heat.", "A force that pushes or pulls.", "A material that conducts electricity."], correct: "Anything that has mass and occupies space." }
+        ],
+        "Energy (Light & Heat)": [
+          { q: "What is the definition of a 'heat conductor'?", options: ["A material that allows heat to pass through it easily.", "A material that blocks heat.", "A material that creates its own heat.", "A material that changes state easily."], correct: "A material that allows heat to pass through it easily." },
+          { q: "What happens to a shadow when the object moves further away from the light source?", options: ["The shadow becomes smaller.", "The shadow becomes larger.", "The shadow disappears.", "The shadow changes shape."], correct: "The shadow becomes smaller." },
+          { q: "Which material allows most light to pass through it?", options: ["Clear Glass", "Wood", "Metal", "Frosted Glass"], correct: "Clear Glass" },
+          { q: "Why are cooking pots usually made of metal?", options: ["Metals are good conductors of heat.", "Metals are good insulators of heat.", "Metals are light.", "Metals melt easily."], correct: "Metals are good conductors of heat." },
+          { q: "How does light travel?", options: ["In straight lines.", "In wavy lines.", "In a zig-zag pattern.", "In circles."], correct: "In straight lines." },
+          { q: "What happens when an object gains heat?", options: ["Its temperature increases.", "Its temperature decreases.", "Its volume decreases.", "Its mass increases."], correct: "Its temperature increases." },
+          { q: "A line graph shows the temperature of water in a black cup rising faster than water in a white cup under the sun. What does this prove?", options: ["Dark colors absorb heat faster than light colors.", "White cups are better conductors.", "Water boils faster in the dark.", "The sun only heats black objects."], correct: "Dark colors absorb heat faster than light colors." },
+          { q: "Experiment: Placing a metal spoon and a plastic spoon in hot soup. After 5 minutes, the metal spoon is hotter. What is the constant variable?", options: ["The temperature of the hot soup.", "The material of the spoons.", "The size of the shadows.", "The mass of the spoons."], correct: "The temperature of the hot soup." },
+          { q: "Data Table: Distance from torch to object: 10cm (Shadow 30cm), 20cm (Shadow 15cm). What is the relationship?", options: ["As distance increases, shadow length decreases.", "As distance increases, shadow length increases.", "Distance does not affect the shadow.", "The light source gets weaker."], correct: "As distance increases, shadow length decreases." },
+          { q: "What is a 'heat insulator'?", options: ["A poor conductor of heat that slows down heat transfer.", "A material that creates cold energy.", "A metal that transfers heat quickly.", "An object that emits light."], correct: "A poor conductor of heat that slows down heat transfer." },
+          { q: "A bimetallic strip bends when heated. What scientific principle does this demonstrate?", options: ["Solids expand when they gain heat.", "Metals melt easily.", "Heat travels in straight lines.", "Air occupies space."], correct: "Solids expand when they gain heat." }
+        ]
+      },
+      P5: {
+        "Cycles (Water & Reproduction)": [
+          { q: "What is the definition of 'condensation' in the water cycle?", options: ["Water vapour losing heat and changing to liquid water.", "Liquid water gaining heat and changing to water vapour.", "Ice melting into water.", "Water freezing into ice."], correct: "Water vapour losing heat and changing to liquid water." },
+          { q: "How do wind-dispersed seeds usually look?", options: ["They are light and have wing-like structures.", "They are brightly colored.", "They are sweet and juicy.", "They have hooks to catch on fur."], correct: "They are light and have wing-like structures." },
+          { q: "At what temperature does pure water boil?", options: ["100 degrees Celsius", "0 degrees Celsius", "50 degrees Celsius", "212 degrees Celsius"], correct: "100 degrees Celsius" },
+          { q: "What is the transfer of pollen grains from the anther to the stigma called?", options: ["Pollination", "Fertilisation", "Germination", "Dispersal"], correct: "Pollination" },
+          { q: "What happens to water during evaporation?", options: ["It gains heat and turns into water vapour.", "It loses heat and turns into ice.", "It loses heat and turns into liquid.", "It gains heat and turns into ice."], correct: "It gains heat and turns into water vapour." },
+          { q: "Which part of the flower develops into a fruit after fertilisation?", options: ["Ovary", "Ovule", "Petal", "Stigma"], correct: "Ovary" },
+          { q: "A graph shows evaporation rate increasing as exposed surface area increases. What is the changed variable?", options: ["The exposed surface area of the water.", "The volume of water.", "The temperature of the room.", "The presence of wind."], correct: "The exposed surface area of the water." },
+          { q: "Experimental setup: Towel A is folded, Towel B is spread out. Both are hung in the sun. Why does Towel B dry faster?", options: ["It has a larger exposed surface area.", "It absorbs more heat from the sun.", "It is a better conductor of heat.", "It is made of a different material."], correct: "It has a larger exposed surface area." },
+          { q: "Data Table: Seed P (fleshy, sweet), Seed Q (hooks, stiff hair), Seed R (wing-like). Which is dispersed by animals eating it?", options: ["Seed P", "Seed Q", "Seed R", "None"], correct: "Seed P" },
+          { q: "Define 'fertilisation' in plants.", options: ["The fusion of the male reproductive cell with the female egg cell.", "The transfer of pollen to the stigma.", "The dispersal of seeds by wind.", "The sprouting of a seedling."], correct: "The fusion of the male reproductive cell with the female egg cell." },
+          { q: "A graph of water temperature over time shows a flat horizontal line at 0 degrees. What process is occurring?", options: ["Melting or Freezing", "Boiling", "Evaporation", "Condensation"], correct: "Melting or Freezing" }
+        ],
+        "Systems (Cells & Transport)": [
+          { q: "What is the function of the 'nucleus' in a cell?", options: ["It controls all activities within the cell.", "It makes food for the cell.", "It gives the cell a regular shape.", "It allows substances to move in and out."], correct: "It controls all activities within the cell." },
+          { q: "Which plant part transports water from the roots to the leaves?", options: ["Water-carrying tubes", "Food-carrying tubes", "Stomata", "Chloroplasts"], correct: "Water-carrying tubes" },
+          { q: "Which part of a plant cell contains chlorophyll to make food?", options: ["Chloroplast", "Nucleus", "Cell Wall", "Cytoplasm"], correct: "Chloroplast" },
+          { q: "Which cell part is found in plant cells but NOT in animal cells?", options: ["Cell Wall", "Cell Membrane", "Nucleus", "Cytoplasm"], correct: "Cell Wall" },
+          { q: "What does the human circulatory system transport?", options: ["Digested food, oxygen, and waste materials.", "Only oxygen.", "Only waste materials.", "Food to the stomach."], correct: "Digested food, oxygen, and waste materials." },
+          { q: "Experiment: The outer ring of a stem (food-carrying tubes) is removed. What happens to the plant after a week?", options: ["The stem above the cut swells as food accumulates.", "The plant immediately dies of thirst.", "The leaves turn blue.", "The roots grow faster."], correct: "The stem above the cut swells as food accumulates." },
+          { q: "What is the definition of a 'cell membrane'?", options: ["A partially permeable layer that controls movement of substances in and out.", "A rigid layer that gives the cell shape.", "A jelly-like substance where activities occur.", "The part that contains genetic information."], correct: "A partially permeable layer that controls movement of substances in and out." },
+          { q: "Data Table: Cell A has chloroplasts. Cell B does not. Both have a nucleus and cell wall. Where is Cell B likely found?", options: ["In the roots of a plant.", "In the leaves of a plant.", "In a human cheek.", "In an animal muscle."], correct: "In the roots of a plant." },
+          { q: "Which variable is crucial to keep constant when comparing the stomata density on the top vs bottom of a leaf?", options: ["The species of the plant.", "The size of the microscope.", "The time of day.", "The amount of water given."], correct: "The species of the plant." }
+        ],
+        "Systems (Electrical)": [
+          { q: "What happens when you add more batteries in a series circuit?", options: ["The bulb becomes brighter.", "The bulb becomes dimmer.", "The current stops.", "The batteries explode."], correct: "The bulb becomes brighter." },
+          { q: "Study the electrical conductivity table:\nMaterial | Does bulb light up?\nX        | Yes\nY        | No\nZ        | Yes\n\nWhat are materials X and Y likely to be?", options: ["X: Metal, Y: Plastic", "X: Wood, Y: Metal", "X: Glass, Y: Plastic", "X: Rubber, Y: Wood"], correct: "X: Metal, Y: Plastic" },
+          { q: "What material is considered a good electrical insulator?", options: ["Rubber", "Copper", "Iron", "Gold"], correct: "Rubber" },
+          { q: "What happens if there is a gap in an electrical circuit?", options: ["The circuit is open and current cannot flow.", "The circuit is closed and current flows faster.", "The batteries overheat.", "The bulb shines brighter."], correct: "The circuit is open and current cannot flow." },
+          { q: "Data: Circuit A has 2 bulbs in series. Circuit B has 2 bulbs in parallel. If one bulb blows in both, what happens?", options: ["Circuit A goes dark; Circuit B stays lit.", "Both circuits go dark.", "Both circuits stay lit.", "Circuit A stays lit; Circuit B goes dark."], correct: "Circuit A goes dark; Circuit B stays lit." },
+          { q: "A graph plots bulb brightness against the number of batteries added in series. What is the trend?", options: ["Brightness increases until the bulb fuses.", "Brightness decreases.", "Brightness stays the same.", "The batteries lose power immediately."], correct: "Brightness increases until the bulb fuses." },
+          { q: "Experiment: Testing conductivity. Wires touch an object. What is the dependent (measured) variable?", options: ["Whether the bulb lights up.", "The material of the object.", "The number of batteries.", "The thickness of the wire."], correct: "Whether the bulb lights up." },
+          { q: "Define 'electrical conductor'.", options: ["A material that allows electric current to flow through it easily.", "A material that resists electric current.", "A source of electrical energy.", "A switch that opens a circuit."], correct: "A material that allows electric current to flow through it easily." },
+          { q: "Why are electrical wires wrapped in plastic?", options: ["Plastic is an electrical insulator that prevents shocks.", "Plastic makes the current flow faster.", "Plastic generates heat.", "Plastic is a good conductor."], correct: "Plastic is an electrical insulator that prevents shocks." }
+        ],
+        "Energy (Photosynthesis)": [
+          { q: "What is the definition of 'photosynthesis'?", options: ["The process by which plants make food using sunlight, water, and carbon dioxide.", "The process of animals digesting food.", "The process of water evaporating.", "The process of a seed germinating into a plant."], correct: "The process by which plants make food using sunlight, water, and carbon dioxide." },
+          { q: "Which gas is taken in by plants during photosynthesis?", options: ["Carbon Dioxide", "Oxygen", "Nitrogen", "Hydrogen"], correct: "Carbon Dioxide" },
+          { q: "What are the products of photosynthesis?", options: ["Sugar and Oxygen", "Water and Carbon Dioxide", "Heat and Light", "Nitrogen and Sugar"], correct: "Sugar and Oxygen" },
+          { q: "Where does a plant get its energy to make food?", options: ["The Sun", "The Soil", "The Water", "The Air"], correct: "The Sun" },
+          { q: "A line graph plots 'Rate of Photosynthesis' vs 'Light Intensity'. The line goes up then flattens out. Why?", options: ["Light intensity increases the rate until another factor limits it.", "Too much light kills the plant.", "The plant ran out of oxygen.", "Photosynthesis only happens in the dark."], correct: "Light intensity increases the rate until another factor limits it." },
+          { q: "Experiment: A plant is kept in a dark cupboard for 48 hours. Why is this done before a photosynthesis test?", options: ["To destarch the leaves (remove stored food).", "To make it grow taller.", "To test if it needs water.", "To kill the chloroplasts."], correct: "To destarch the leaves (remove stored food)." },
+          { q: "Data: Hydrilla plant in water produces 5 bubbles/min at 30cm from a lamp, and 15 bubbles/min at 10cm. What is the changed variable?", options: ["Light intensity (distance from lamp)", "Amount of water", "Type of plant", "Temperature of water"], correct: "Light intensity (distance from lamp)" },
+          { q: "What is the purpose of chlorophyll?", options: ["To trap light energy for photosynthesis.", "To absorb water from the ground.", "To attract insects.", "To release carbon dioxide."], correct: "To trap light energy for photosynthesis." }
+        ]
+      },
+      P6: {
+        "Interactions (Forces)": [
+          { q: "What is the definition of 'frictional force'?", options: ["A force that opposes motion between two surfaces in contact.", "A pull exerted by the Earth.", "A force that pulls magnetic materials.", "A force exerted by a stretched spring."], correct: "A force that opposes motion between two surfaces in contact." },
+          { q: "Study the table showing the extension of a spring with different weights attached:\nWeight (g) | Total Length (cm)\n0          | 10\n50         | 12\n100        | 14\n\nWhat is the original length of the spring and its extension per 50g?", options: ["Original: 10cm, Extension: 2cm", "Original: 0cm, Extension: 12cm", "Original: 12cm, Extension: 2cm", "Original: 10cm, Extension: 4cm"], correct: "Original: 10cm, Extension: 2cm" },
+          { q: "Which force causes a ball thrown into the air to fall back down?", options: ["Gravitational force", "Frictional force", "Magnetic force", "Elastic spring force"], correct: "Gravitational force" },
+          { q: "Why do we apply oil to moving machine parts?", options: ["To reduce friction.", "To increase friction.", "To make them heavier.", "To change their shape."], correct: "To reduce friction." },
+          { q: "Which of the following describes elastic spring force?", options: ["It is exerted by a stretched or compressed spring.", "It only pushes things away.", "It acts on all objects with mass.", "It opposes all motion."], correct: "It is exerted by a stretched or compressed spring." },
+          { q: "Data Table: Force needed to pull a block on Glass (2N), Wood (5N), Sandpaper (12N). What conclusion can be drawn?", options: ["Rougher surfaces produce more friction.", "Smoother surfaces produce more friction.", "Friction depends on the mass of the block.", "Glass is a magnetic material."], correct: "Rougher surfaces produce more friction." },
+          { q: "Experiment: A toy car is released from a ramp. To test how surface roughness affects distance travelled, what must be constant?", options: ["The height of the ramp and the toy car.", "The surface of the floor.", "The distance travelled.", "The color of the car."], correct: "The height of the ramp and the toy car." },
+          { q: "A graph plots 'Extension of spring' vs 'Mass attached'. It forms a straight diagonal line. What does this mean?", options: ["Extension increases steadily as mass increases.", "The spring is broken.", "Gravity is decreasing.", "Mass decreases as extension increases."], correct: "Extension increases steadily as mass increases." },
+          { q: "Define 'Gravitational Force'.", options: ["A force that pulls objects towards the center of the Earth.", "A force that pushes objects away.", "A force that opposes motion.", "A force between two magnets."], correct: "A force that pulls objects towards the center of the Earth." }
+        ],
+        "Interactions (Web of Life)": [
+          { q: "A food web consists of Grass -> Rabbit -> Fox. What happens if the Rabbit dies out?", options: ["Fox population decreases, Grass population increases.", "Fox population increases, Grass population decreases.", "Both Fox and Grass populations increase.", "Both Fox and Grass populations decrease."], correct: "Fox population decreases, Grass population increases." },
+          { q: "What is the main source of energy for most food webs?", options: ["The Sun", "Water", "Soil", "Oxygen"], correct: "The Sun" },
+          { q: "What role do decomposers like fungi play in the environment?", options: ["They break down dead matter into simple substances.", "They produce food using sunlight.", "They hunt other animals for energy.", "They provide shelter for small insects."], correct: "They break down dead matter into simple substances." },
+          { q: "Which of the following is considered a producer?", options: ["A plant", "A lion", "A human", "A mushroom"], correct: "A plant" },
+          { q: "How do animals obtain energy?", options: ["By eating plants or other animals.", "By absorbing sunlight.", "By drinking water.", "By resting in the shade."], correct: "By eating plants or other animals." },
+          { q: "Data Table: Population of organism X drops drastically in June. Population of organism Y rises in June. X eats Y. Why did Y rise?", options: ["Fewer organism X are alive to eat organism Y.", "Organism Y ate all of organism X.", "Organism Y learned to photosynthesize.", "Organism X turned into organism Y."], correct: "Fewer organism X are alive to eat organism Y." },
+          { q: "A line graph shows a predator population lagging slightly behind a prey population in peaks and valleys. Why?", options: ["Predator numbers depend on the availability of prey.", "Prey numbers depend on the weather only.", "They do not interact.", "Predators eat plants when prey is low."], correct: "Predator numbers depend on the availability of prey." },
+          { q: "Define a 'Population' in an ecosystem.", options: ["A group of organisms of the same kind living in the same habitat.", "All living and non-living things in an area.", "A single animal.", "Organisms that make their own food."], correct: "A group of organisms of the same kind living in the same habitat." },
+          { q: "In an experimental setup, plants are kept in an airtight glass jar with snails. Why do the snails survive longer than if alone?", options: ["Plants produce oxygen which the snails use to breathe.", "Snails eat the glass.", "Plants produce carbon dioxide.", "The jar provides heat."], correct: "Plants produce oxygen which the snails use to breathe." }
+        ],
+        "Energy (Kinetic & Potential)": [
+          { q: "A ball rolls down a ramp. What energy conversion is happening?", options: ["Potential Energy is converting into Kinetic Energy.", "Kinetic Energy is converting into Potential Energy.", "Heat Energy is converting into Kinetic Energy.", "Light Energy is converting into Potential Energy."], correct: "Potential Energy is converting into Kinetic Energy." },
+          { q: "When does a stretched rubber band have the most potential energy?", options: ["When it is stretched to its maximum.", "When it is resting on a table.", "When it snaps.", "When it is heated."], correct: "When it is stretched to its maximum." },
+          { q: "What kind of energy does a moving car possess?", options: ["Kinetic energy", "Potential energy", "Light energy", "Sound energy"], correct: "Kinetic energy" },
+          { q: "Data: A marble dropped from 10cm makes a 1cm crater. Dropped from 50cm makes a 4cm crater. What is the conclusion?", options: ["An object at a greater height has more potential energy.", "An object at a lower height has more kinetic energy.", "Gravity increases as you go higher.", "The marble gets heavier."], correct: "An object at a greater height has more potential energy." },
+          { q: "A graph shows the kinetic energy of a pendulum. Where is kinetic energy at its highest?", options: ["At the lowest point of its swing.", "At the highest point of its swing.", "When it stops moving.", "Just before it is released."], correct: "At the lowest point of its swing." },
+          { q: "Experiment: Reinding a toy car's spring 5 times vs 10 times. What is the dependent (measured) variable?", options: ["The distance the toy car travels.", "The number of winds.", "The mass of the car.", "The surface it runs on."], correct: "The distance the toy car travels." },
+          { q: "Define 'Kinetic Energy'.", options: ["The energy an object has due to its motion.", "The stored energy in an object due to its position.", "The energy that allows us to see.", "The energy given off as heat."], correct: "The energy an object has due to its motion." }
+        ]
+      }
+    };
+
+    const MAP_SIZE = 35; 
+    const CLASSES = {
+      Warrior: { hp: 160, atk: 25, def: 20, hpGrow: 40, atkGrow: 12, defGrow: 8, basicAttackName: 'Sword Dance', ultName: 'Omnislash', color: '#1d4ed8' }, 
+      Mage: { hp: 100, atk: 40, def: 10, hpGrow: 20, atkGrow: 18, defGrow: 4, basicAttackName: 'Cast', ultName: 'Meteor Strike', color: '#7e22ce' }, 
+      Archer: { hp: 120, atk: 30, def: 14, hpGrow: 25, atkGrow: 15, defGrow: 6, basicAttackName: 'Shoot', ultName: 'Piercing Arrow', color: '#15803d' }, 
+      Rogue: { hp: 110, atk: 35, def: 12, hpGrow: 22, atkGrow: 16, defGrow: 5, basicAttackName: 'Surprise Move', ultName: 'Shadow Dance', color: '#374151' } 
+    };
+
+    const EXP_REQUIREMENTS = [0, 50, 150, 300, 500, 800, 1200, 1800, 2500, 3500];
+
+    const ENEMIES = [
+      { name: 'Slime', hp: 45, atk: 15, def: 5, exp: 25, gold: 15, minLevel: 1, icon: '💧', dropTier: 1, zone: 'grass' },
+      { name: 'Giant Rat', hp: 35, atk: 18, def: 3, exp: 20, gold: 10, minLevel: 1, icon: '🐀', dropTier: 1, zone: 'grass' },
+      { name: 'Wild Dog', hp: 40, atk: 20, def: 4, exp: 22, gold: 12, minLevel: 1, icon: '🐕', dropTier: 1, zone: 'grass' },
+      { name: 'Forest Spider', hp: 50, atk: 16, def: 6, exp: 28, gold: 18, minLevel: 1, icon: '🕷️', dropTier: 1, zone: 'forest' },
+      
+      { name: 'Goblin', hp: 80, atk: 25, def: 12, exp: 55, gold: 25, minLevel: 2, icon: '👺', dropTier: 1, zone: 'grass' },
+      { name: 'Cave Bat', hp: 60, atk: 35, def: 8, exp: 70, gold: 30, minLevel: 2, icon: '🦇', dropTier: 1, zone: 'cave' },
+      { name: 'Dire Wolf', hp: 90, atk: 28, def: 10, exp: 60, gold: 28, minLevel: 2, icon: '🐺', dropTier: 1, zone: 'forest' },
+      { name: 'Bandit', hp: 100, atk: 30, def: 14, exp: 65, gold: 40, minLevel: 2, icon: '🦹', dropTier: 1, zone: 'grass' },
+      { name: 'Wild Ram', hp: 70, atk: 26, def: 15, exp: 50, gold: 20, minLevel: 2, icon: '🐏', dropTier: 1, zone: 'demon' },
+      
+      { name: 'Orc', hp: 160, atk: 45, def: 20, exp: 120, gold: 50, minLevel: 3, icon: '🐗', dropTier: 2, zone: 'grass' },
+      { name: 'Swamp Toad', hp: 180, atk: 40, def: 18, exp: 110, gold: 45, minLevel: 3, icon: '🐸', dropTier: 2, zone: 'demon' },
+      { name: 'Giant Snake', hp: 140, atk: 50, def: 15, exp: 130, gold: 60, minLevel: 3, icon: '🐍', dropTier: 2, zone: 'forest' },
+      { name: 'Rogue Mage', hp: 120, atk: 55, def: 12, exp: 140, gold: 70, minLevel: 3, icon: '🧙‍♂️', dropTier: 2, zone: 'demon' },
+      { name: 'Harpy', hp: 130, atk: 48, def: 16, exp: 125, gold: 55, minLevel: 3, icon: '🦅', dropTier: 2, zone: 'forest' },
+      
+      { name: 'Cave Troll', hp: 280, atk: 65, def: 35, exp: 250, gold: 100, minLevel: 4, icon: '🧌', dropTier: 3, zone: 'cave' },
+      { name: 'Stone Golem', hp: 350, atk: 55, def: 50, exp: 280, gold: 120, minLevel: 4, icon: '🪨', dropTier: 3, zone: 'cave' },
+      { name: 'Minotaur', hp: 300, atk: 70, def: 30, exp: 260, gold: 110, minLevel: 4, icon: '🐂', dropTier: 3, zone: 'grass' },
+      { name: 'Rock Scorpion', hp: 250, atk: 68, def: 38, exp: 240, gold: 95, minLevel: 4, icon: '🦂', dropTier: 3, zone: 'demon' },
+      
+      { name: 'Fierce Bear', hp: 350, atk: 85, def: 40, exp: 400, gold: 150, minLevel: 5, icon: '🐻', dropTier: 3, zone: 'demon' },
+      { name: 'Fire Fox', hp: 320, atk: 95, def: 35, exp: 420, gold: 160, minLevel: 5, icon: '🦊', dropTier: 3, zone: 'demon' },
+
+      { name: 'Hermit Crab', hp: 60, atk: 20, def: 15, exp: 35, gold: 20, minLevel: 1, icon: '🐚', dropTier: 1, zone: 'sea' },
+      { name: 'Sea Slime', hp: 50, atk: 18, def: 5, exp: 30, gold: 18, minLevel: 1, icon: '🪼', dropTier: 1, zone: 'sea' },
+      { name: 'Poison Jellyfish', hp: 80, atk: 30, def: 8, exp: 60, gold: 35, minLevel: 2, icon: '🪼', dropTier: 1, zone: 'sea' },
+      { name: 'Giant Crab', hp: 120, atk: 35, def: 25, exp: 80, gold: 45, minLevel: 2, icon: '🦀', dropTier: 2, zone: 'sea' },
+      { name: 'Sea Serpent', hp: 150, atk: 45, def: 15, exp: 130, gold: 60, minLevel: 3, icon: '🐍', dropTier: 2, zone: 'sea' },
+      { name: 'Murloc Raider', hp: 160, atk: 40, def: 20, exp: 140, gold: 65, minLevel: 3, icon: '🧜‍♂️', dropTier: 2, zone: 'sea' },
+      { name: 'Killer Shark', hp: 220, atk: 60, def: 20, exp: 200, gold: 85, minLevel: 4, icon: '🦈', dropTier: 3, zone: 'sea' },
+      { name: 'Giant Squid', hp: 260, atk: 55, def: 25, exp: 240, gold: 95, minLevel: 4, icon: '🦑', dropTier: 3, zone: 'sea' },
+      { name: 'Deep Sea Angler', hp: 320, atk: 75, def: 30, exp: 300, gold: 130, minLevel: 5, icon: '🐡', dropTier: 3, zone: 'sea' },
+      { name: 'Kraken Tentacle', hp: 380, atk: 90, def: 40, exp: 350, gold: 150, minLevel: 5, icon: '🐙', dropTier: 3, zone: 'sea' }
+    ];
+
+    const ELITES = {
+      '1': { name: 'Cave Behemoth', hp: 600, atk: 75, def: 45, exp: 600, gold: 300, isElite: true, icon: '🦖', magicDrop: { type: 'weapon', name: 'Crystal Sword', atk: 75 } },
+      '2': { name: 'Alpha Gorilla', hp: 900, atk: 95, def: 55, exp: 1000, gold: 500, isElite: true, icon: '🦍', magicDrop: { type: 'armor', name: 'Titanium Plate', def: 65 } },
+      '3': { name: 'Forest Ent', hp: 500, atk: 60, def: 40, exp: 500, gold: 250, isElite: true, icon: '🌳', magicDrop: { type: 'armor', name: 'Bark Shield', def: 50 } },
+      '4': { name: 'Ruin Golem', hp: 700, atk: 80, def: 60, exp: 800, gold: 400, isElite: true, icon: '🗿', magicDrop: { type: 'weapon', name: 'Titan Hammer', atk: 85 } },
+      '5': { name: 'Siren Queen', hp: 7000, atk: 300, def: 180, exp: 9000, gold: 3500, isElite: true, isBossLevel: true, icon: '🧜‍♀️', magicDrop: { type: 'weapon', name: 'Ocean Trident', atk: 220, doubleUlt: true } },
+      '6': { name: 'Immortal Phoenix', hp: 12000, atk: 450, def: 300, exp: 15000, gold: 6000, isElite: true, isBossLevel: true, icon: '🦅', magicDrop: { type: 'necklace', name: 'Phoenix Tear', regen: 100, hasRevive: true } },
+      'X': { name: 'Celestial Dragon', hp: 8500, atk: 350, def: 200, exp: 12000, gold: 4000, isElite: true, isBossLevel: true, icon: '🐉', magicDrop: { type: 'armor', name: 'Chrono Shield', def: 250, allowsUltEveryTurn: true } }
+    };
+
+    const BOSS = { name: 'Apex Chimera', hp: 20000, atk: 800, def: 500, exp: 40000, gold: 20000, isBoss: true, isBossLevel: true, icon: '🦁' };
+
+    const getDifficultyColor = (enemy, player) => {
+      if (!enemy) return 'text-white';
+      const playerPower = player.maxHp + (player.atk * 5) + (player.def * 5);
+      const enemyPower = enemy.hp + (enemy.atk * 5) + (enemy.def * 5);
+      const ratio = enemyPower / playerPower;
+      
+      if (ratio > 2.5) return 'text-red-500'; 
+      if (ratio > 1.2) return 'text-orange-500'; 
+      return 'text-green-500'; 
+    };
+
+    const SHOP_ITEMS = {
+      weapons: [{ name: 'Iron Sword', atk: 15, cost: 100, type: 'weapon' }, { name: 'Steel Blade', atk: 35, cost: 350, type: 'weapon' }, { name: 'Hero Lance', atk: 65, cost: 800, type: 'weapon' }],
+      armors: [{ name: 'Leather Vest', def: 10, cost: 100, type: 'armor' }, { name: 'Chainmail', def: 25, cost: 350, type: 'armor' }, { name: 'Hero Plate', def: 50, cost: 800, type: 'armor' }],
+      necklaces: [{ name: 'Silver Pendant', regen: 10, cost: 300, type: 'necklace' }, { name: 'Gold Amulet', regen: 30, cost: 900, type: 'necklace' }]
+    };
+
+    const MYSTICAL_ITEMS = {
+      weapons: [{ name: 'Beast Slayer', atk: 150, cost: 2200, type: 'weapon' }],
+      armors: [{ name: 'Aegis Shield', def: 100, cost: 1800, type: 'armor' }],
+      consumables: [{ name: 'Elixir of Life', heal: 999, cost: 500 }],
+      keyItems: [{ name: 'Magic Sail', cost: 1000, type: 'keyItem', desc: 'Allows Sea Travel' }]
+    };
+
+    const NORMAL_DROPS = {
+      1: [{ type: 'weapon', name: 'Rusty Blade', atk: 10 }, { type: 'armor', name: 'Tattered Shirt', def: 8 }],
+      2: [{ type: 'weapon', name: 'Iron Mace', atk: 25 }, { type: 'armor', name: 'Bronze Guard', def: 20 }],
+      3: [{ type: 'weapon', name: 'Steel Axe', atk: 45 }, { type: 'armor', name: 'Knight Shield', def: 40 }]
+    };
+
+    const generateMap = () => {
+      let map = Array(MAP_SIZE).fill(null).map(() => Array(MAP_SIZE).fill('.'));
+      for (let y = 0; y < MAP_SIZE; y++) {
+        for (let x = 0; x < MAP_SIZE; x++) {
+          if (x === 0 || y === 0 || x === MAP_SIZE - 1 || y === MAP_SIZE - 1) { map[y][x] = '~'; continue; } 
+          const r = Math.abs(Math.sin(x * 12.9898 + y * 78.233)) * 43758.5453 % 1;
+          if (r < 0.12) map[y][x] = 'M'; else if (r < 0.22) map[y][x] = 'W'; else if (r < 0.45) map[y][x] = 'T'; 
+        }
+      }
+      for (let x = 5; x <= 25; x++) map[15][x] = '.'; 
+      for (let y = 5; y <= 25; y++) map[y][15] = '.'; 
+
+      for(let i=1; i<8; i++) { map[1][i] = '~'; map[2][i] = '~'; map[i][1] = '~'; map[i][2] = '~'; }
+      map[2][2] = '5'; // Siren Queen
+      map[3][5] = 'i'; // Siren Queen Sign
+
+      for(let y=1; y<=10; y++) for(let x=25; x<=33; x++) map[y][x] = 'M'; 
+      for(let y=2; y<=9; y++) for(let x=26; x<=32; x++) map[y][x] = 'L'; 
+      map[4][30] = 'B'; map[6][28] = '2'; 
+      map[10][29] = '.'; map[9][29] = 'L'; map[12][29] = 'i'; // Demon King Sign
+      
+      for(let y=3; y<=7; y++) for(let x=13; x<=17; x++) map[y][x] = '~';
+      for(let y=4; y<=6; y++) for(let x=14; x<=16; x++) map[y][x] = 'L';
+      map[5][15] = '6'; // Immortal Phoenix
+      map[9][15] = 'i'; // Phoenix Sign
+      
+      for(let y=25; y<=33; y++) for(let x=1; x<=11; x++) map[y][x] = 'M'; 
+      map[29][1] = '~'; map[29][2] = 'C'; map[29][3] = '_'; map[29][4] = '_'; map[29][5] = '1'; 
+      map[27][6] = 'i'; // Behemoth Sign
+      
+      map[8][8] = '3'; map[24][20] = '4'; 
+      
+      for(let y=14; y<=16; y++) for(let x=14; x<=16; x++) map[y][x] = '.';
+      map[15][15] = 'O'; 
+
+      map[33][33] = 'S'; map[33][32] = '.'; map[32][33] = '.'; map[32][32] = '.'; 
+      map[30][31] = 'X'; 
+      map[32][29] = 'i'; // Dragon Sign
+
+      return map;
+    };
+
+    const generateTreasures = (map) => {
+      const treasures = [];
+      for (let i = 0; i < 25; i++) {
+        const x = Math.floor(Math.random() * MAP_SIZE);
+        const y = Math.floor(Math.random() * MAP_SIZE);
+        if ((map[y][x] === '.' || map[y][x] === 'T') && !treasures.find(t => t.x === x && t.y === y)) {
+          treasures.push({ id: Math.random(), x, y });
+        }
+      }
+      return treasures;
+    };
+
+    const HeroSprite = ({ tunicColor = "#1d4ed8", boat = false }) => {
+      if (boat) return <span className="animate-bounce drop-shadow-lg z-10 text-3xl sm:text-4xl md:text-5xl lg:text-6xl">⛵</span>;
+      return (
+        <div className="w-[75%] h-[75%] drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] animate-bounce z-10">
+          <svg viewBox="0 0 16 16" width="100%" height="100%" shapeRendering="crispEdges">
+            <rect x="4" y="0" width="8" height="2" fill="#5c3a21" />
+            <rect x="3" y="2" width="10" height="2" fill="#5c3a21" />
+            <rect x="2" y="3" width="2" height="3" fill="#5c3a21" />
+            <rect x="12" y="3" width="2" height="3" fill="#5c3a21" />
+            <rect x="4" y="4" width="8" height="4" fill="#fcae7c" />
+            <rect x="5" y="5" width="1" height="2" fill="#000" />
+            <rect x="10" y="5" width="1" height="2" fill="#000" />
+            <rect x="3" y="8" width="10" height="1" fill="#fff" />
+            <rect x="4" y="9" width="8" height="4" fill={tunicColor} />
+            <rect x="4" y="12" width="8" height="1" fill="#333" />
+            <rect x="7" y="12" width="2" height="1" fill="#fbbf24" />
+            <rect x="2" y="9" width="2" height="2" fill="#fcae7c" />
+            <rect x="12" y="9" width="2" height="2" fill="#fcae7c" />
+            <rect x="4" y="13" width="3" height="2" fill="#f3f4f6" />
+            <rect x="9" y="13" width="3" height="2" fill="#f3f4f6" />
+            <rect x="3" y="15" width="4" height="1" fill="#4a2e1b" />
+            <rect x="9" y="15" width="4" height="1" fill="#4a2e1b" />
+          </svg>
+        </div>
+      );
+    };
+
+    function App() {
+      const [gameState, setGameState] = useState('START'); 
+      const [logs, setLogs] = useState([]);
+      const [worldMap, setWorldMap] = useState([]);
+      const [treasures, setTreasures] = useState([]);
+      
+      const [playerPos, setPlayerPos] = useState({ x: 15, y: 15 });
+      const posRef = useRef({ x: 15, y: 15 }); 
+      
+      const availableGrades = ['P3', 'P4', 'P5', 'P6'];
+      const [selectedGrade, setSelectedGrade] = useState('P3');
+      const [selectedTopics, setSelectedTopics] = useState(
+        Object.keys(QUESTION_BANKS['P3']).map(t => `P3|${t}`)
+      );
+
+      const [player, setPlayer] = useState({
+        name: 'Hero', gender: 'Male', charClass: 'Warrior', level: 1, exp: 0, gold: 50, potions: 3, 
+        hp: 160, maxHp: 160, atk: 25, def: 20, weapon: null, armor: null, necklace: null, ultCooldown: 0, hasBoat: false, hasRevivedThisBattle: false,
+        selectedTopics: [], inventory: [], startTime: Date.now(), answers: []
+      });
+
+      const [currentEnemy, setCurrentEnemy] = useState(null);
+      const [fightingEliteId, setFightingEliteId] = useState(null); 
+      const [pendingLoot, setPendingLoot] = useState(null);
+      
+      const [showQuiz, setShowQuiz] = useState(false);
+      const [quizProblem, setQuizProblem] = useState(null);
+      const [isActionLocked, setIsActionLocked] = useState(false); 
+      const [quizType, setQuizType] = useState(null); 
+      const [ultAnswers, setUltAnswers] = useState([]);
+      const unaskedQuestions = useRef([]); 
+
+      const [screenVfx, setScreenVfx] = useState(null); 
+      const [overlayVfx, setOverlayVfx] = useState(null); 
+      const [, setForceRender] = useState(0);
+      const [localIsMuted, setLocalIsMuted] = useState(isMuted);
+      
+      const [fairyActive, setFairyActive] = useState(false);
+      const [fairyText, setFairyText] = useState("");
+      const [mistakeLog, setMistakeLog] = useState([]); 
+      const [activeMenu, setActiveMenu] = useState(null); 
+      
+      const [tick, setTick] = useState(0);
+
+      const playerRef = useRef(player);
+      const logEndRef = useRef(null);
+
+      const [hasSave, setHasSave] = useState(false);
+      const [confirmReset, setConfirmReset] = useState(false);
+      
+      useEffect(() => {
+        const loader = document.getElementById('sls-loader');
+        if (loader) loader.style.display = 'none';
+        try { if (localStorage.getItem('retroHeroSave')) setHasSave(true); } catch(e){}
+      }, []);
+
+      useEffect(() => { if (logEndRef.current) logEndRef.current.scrollIntoView({ behavior: 'smooth' }); }, [logs]);
+      useEffect(() => { playerRef.current = player; }, [player]);
+
+      useEffect(() => {
+        if (['EXPLORE', 'TOWN', 'SHOP', 'MYSTICAL_SHOP', 'LOOT'].includes(gameState)) playMusic('explore');
+        else if (gameState === 'COMBAT') {
+          if (currentEnemy?.isBossLevel) playMusic('boss');
+          else playMusic('combat');
+        }
+        else stopMusic();
+        return () => stopMusic();
+      }, [gameState, currentEnemy]);
+
+      useEffect(() => {
+        const timer = setInterval(() => setTick(t => t + 1), 1000);
+        return () => clearInterval(timer);
+      }, []);
+
+      // --- FAIRY NPC TIMER (Once Every 60 Seconds) ---
+      useEffect(() => {
+        if (gameState !== 'EXPLORE') return;
+        const fairyInterval = setInterval(() => {
+          const p = playerRef.current;
+          let tip = "Keep grinding those wild monsters to level up!";
+          
+          if (p.level <= 2) tip = "A low-level adventurer! Hunt Slimes and Rats in the grass to grow stronger.";
+          else if (p.level <= 4) tip = "You look stronger! Try venturing into the forests or shores for tougher foes.";
+          else if (p.level <= 6) tip = "You are ready for your first Elite! The Forest Ent (🌳) hides in the central woods.";
+          else if (p.level <= 8) tip = "The Ruin Golem (🗿) slumbers in the southern mountains. Defeat it for the Titan Hammer!";
+          else if (p.level <= 10) tip = "Seek the Cave Behemoth (🦖) in the deep southwest caves by taking a boat.";
+          else if (p.level <= 12) tip = "The Demon General (👹) guards the lava approach! His Infernal Plate is unmatched.";
+          else if (p.level <= 14) tip = "The Siren Queen (🧜‍♀️) rules the northwest sea. Bring 30 potions if you value your life!";
+          else if (!p.necklace) tip = "The Apex Chimera is too strong! Defeat the Phoenix (🦅) first to get the auto-revive necklace!";
+          else tip = "You are ready... cross the lava fields and defeat the Apex Chimera (🦁)!";
+
+          if (!p.hasBoat && p.gold >= 1000) tip = "You have enough gold! Go to the Mystical Shop (🌌) to buy a Magic Sail!";
+          if (p.potions < 5) tip = "You're running low on potions! Head back to the Sanctuary Town (🛖) to stock up!";
+
+          setFairyText(tip);
+          setFairyActive(true);
+          setTimeout(() => setFairyActive(false), 8000); 
+        }, 60000); 
+        return () => clearInterval(fairyInterval);
+      }, [gameState]); 
+
+      const totalAtk = player.atk + (player.weapon ? player.weapon.atk : 0);
+      const totalDef = player.def + (player.armor ? player.armor.def : 0);
+
+      const triggerScreenVFX = (effect, duration = 800) => { setScreenVfx(effect); setTimeout(() => setScreenVfx(null), duration); };
+      const triggerOverlayVFX = (effect, duration = 600) => { setOverlayVfx(effect); setTimeout(() => setOverlayVfx(null), duration); };
+      const addLog = (message, color = 'text-gray-300') => setLogs(prev => [...prev.slice(-30), { id: Date.now() + Math.random(), message, color }]);
+      const calculateDamage = (atk, def) => Math.max(1, Math.floor((atk - def) * (0.8 + Math.random() * 0.4)));
+
+      const handleGradeChange = (e) => {
+        const newGrade = e.target.value;
+        setSelectedGrade(newGrade);
+        const maxIdx = availableGrades.indexOf(newGrade);
+        const newAvailable = [];
+        for(let i=0; i<=maxIdx; i++) {
+          const g = availableGrades[i];
+          Object.keys(QUESTION_BANKS[g] || {}).forEach(t => newAvailable.push(`${g}|${t}`));
+        }
+        setSelectedTopics(newAvailable);
+      };
+
+      const getNextScienceQuestion = () => {
+        if (unaskedQuestions.current.length === 0) {
+          let questionsPool = [];
+          player.selectedTopics.forEach(tId => {
+             const [g, t] = tId.split('|');
+             if (QUESTION_BANKS[g] && QUESTION_BANKS[g][t]) {
+                 questionsPool.push(...QUESTION_BANKS[g][t].map(q => ({...q, topic: tId})));
+             }
+          });
+          if (questionsPool.length === 0) questionsPool.push(...QUESTION_BANKS['P3']['Diversity (Living/Non-Living & Materials)'].map(q => ({...q, topic: 'P3|Diversity (Living/Non-Living & Materials)'})));
+          unaskedQuestions.current = questionsPool.sort(() => Math.random() - 0.5);
+        }
+        return unaskedQuestions.current.pop();
+      };
+
+      const saveGame = () => {
+        try {
+          const saveData = { player, playerPos, treasures, logs, unaskedQuestions: unaskedQuestions.current, selectedGrade, selectedTopics, mistakeLog };
+          localStorage.setItem('retroHeroSave', JSON.stringify(saveData));
+          setHasSave(true); addLog("Game Saved Successfully!", "text-green-400");
+        } catch(e) {
+          addLog("Error: Save blocked by browser settings.", "text-red-400");
+        }
+      };
+
+      const loadGame = () => {
+        getAudioCtx();
+        try {
+          const saved = localStorage.getItem('retroHeroSave');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (!parsed.player.startTime) parsed.player.startTime = Date.now();
+            if (!parsed.player.answers) parsed.player.answers = [];
+            setPlayer({ ...parsed.player, inventory: parsed.player.inventory || [] }); 
+            setPlayerPos(parsed.playerPos); posRef.current = parsed.playerPos;
+            setTreasures(parsed.treasures); setLogs(parsed.logs || []);
+            unaskedQuestions.current = parsed.unaskedQuestions || [];
+            setSelectedGrade(parsed.selectedGrade || 'P3'); setSelectedTopics(parsed.selectedTopics || []);
+            setMistakeLog(parsed.mistakeLog || []); 
+            setWorldMap(generateMap()); setGameState('EXPLORE');
+          }
+        } catch (e) { console.error("Failed to load save:", e); }
+      };
+
+      const triggerReset = () => setConfirmReset(true);
+      const executeReset = () => {
+        try { localStorage.removeItem('retroHeroSave'); } catch(e){}
+        setHasSave(false); setConfirmReset(false); setGameState('START'); setCurrentEnemy(null); setFightingEliteId(null); setPendingLoot(null); setLogs([]); setMistakeLog([]); setPlayerPos({ x: 15, y: 15 }); posRef.current = { x: 15, y: 15 };
+      };
+
+      const startGame = () => {
+        getAudioCtx();
+        const newMap = generateMap(); setWorldMap(newMap); setTreasures(generateTreasures(newMap));
+        setGameState('CREATE');
+      };
+
+      const createCharacter = (e) => {
+        e.preventDefault();
+        if (selectedTopics.length === 0) return; 
+        
+        const formData = new FormData(e.target);
+        const charClass = formData.get('charClass') || 'Warrior'; 
+        const base = CLASSES[charClass];
+        
+        setPlayer({
+          name: formData.get('name') || 'Hero', gender: formData.get('gender'), charClass, selectedTopics: selectedTopics,
+          level: 1, exp: 0, gold: 50, potions: 3, hp: base.hp, maxHp: base.hp, atk: base.atk, def: base.def,
+          weapon: null, armor: null, necklace: null, ultCooldown: 0, hasBoat: false, hasRevivedThisBattle: false, inventory: [],
+          startTime: Date.now(), answers: []
+        });
+        
+        let questionsPool = [];
+        selectedTopics.forEach(tId => {
+           const [g, t] = tId.split('|');
+           if (QUESTION_BANKS[g] && QUESTION_BANKS[g][t]) {
+               questionsPool.push(...QUESTION_BANKS[g][t].map(q => ({...q, topic: tId})));
+           }
+        });
+        unaskedQuestions.current = questionsPool.sort(() => Math.random() - 0.5);
+
+        setPlayerPos({ x: 15, y: 15 }); posRef.current = { x: 15, y: 15 }; setLogs([]); setMistakeLog([]);
+        addLog(`Welcome! You chose ${selectedTopics.length} Science topic(s). Answer wisely to power your ultimate!`, 'text-yellow-400');
+        setGameState('EXPLORE');
+      };
+
+      const respawnPlayer = () => {
+        setPlayer(p => ({ ...p, hp: p.maxHp, gold: Math.floor(p.gold / 2) }));
+        setPlayerPos({ x: 15, y: 15 }); posRef.current = { x: 15, y: 15 }; 
+        setGameState('TOWN');
+        addLog("Your soul returns to Sanctuary Town. Half your gold was lost.", "text-red-400 font-bold");
+      };
+
+      const move = useCallback((dx, dy) => {
+        if (gameState !== 'EXPLORE' || activeMenu) return;
+        
+        const nx = ((posRef.current.x + dx) % MAP_SIZE + MAP_SIZE) % MAP_SIZE;
+        const ny = ((posRef.current.y + dy) % MAP_SIZE + MAP_SIZE) % MAP_SIZE;
+        
+        const tile = worldMap[ny][nx];
+        if (tile === 'M' || tile === 'W') return; 
+        
+        if (tile === '~' && !player.hasBoat) {
+          addLog("The deep sea blocks your path. You need a Magic Sail.", "text-blue-400 font-bold"); return;
+        }
+        
+        if (tile === 'B' && player.level < 5) { addLog("Barrier repels you! Level up 4 times (Lv 5) to enter.", "text-red-400 font-bold"); return; }
+
+        posRef.current = { x: nx, y: ny }; setPlayerPos({ x: nx, y: ny });
+
+        if (tile === 'L') {
+          setPlayer(p => {
+            const newHp = p.hp - 10;
+            if (newHp <= 0) { setTimeout(() => { sfx.defeat(); setGameState('GAME_OVER'); }, 100); } 
+            else { triggerScreenVFX('flash-red', 400); }
+            return { ...p, hp: Math.max(0, newHp) };
+          });
+          if (player.hp - 10 <= 0) { addLog("You burned to death in the lava fields!", "text-red-600 font-bold"); return; } 
+          else { addLog("LAVA! The heat burns you for 10 DMG!", "text-red-500 font-bold"); }
+        }
+
+        if (tile === 'i') {
+          if (nx === 29 && ny === 12) addLog("SIGN: 'He strikes for 60% of your soul. Without the blazing bird's tear, death is certain.'", "text-cyan-300 font-bold md:text-lg");
+          else if (nx === 6 && ny === 27) addLog("SIGN: 'Sail behind the western stone crags to find the dark maw where the Cave Behemoth slumbers.'", "text-cyan-300 font-bold md:text-lg");
+          else if (nx === 29 && ny === 32) addLog("SIGN: 'To cast magic without rest, seek the Celestial Dragon across the eastern blue. A Magic Sail is required.'", "text-cyan-300 font-bold md:text-lg");
+          else if (nx === 5 && ny === 3) addLog("SIGN: 'Her song is relentless. Do not face the Siren Queen without at least 30 potions in your bag!'", "text-orange-400 font-bold md:text-lg");
+          else if (nx === 15 && ny === 9) addLog("SIGN: 'The Immortal Phoenix drops a tear that turns death into an illusion. Seek the northern volcano.'", "text-orange-400 font-bold md:text-lg");
+          else addLog("SIGN: Read carefully, hero.", "text-cyan-300 font-bold");
+        }
+
+        const tIdx = treasures.findIndex(t => t.x === nx && t.y === ny);
+        if (tIdx > -1) {
+          sfx.treasure(); setTreasures(prev => prev.filter((_, i) => i !== tIdx));
+          const r = Math.random();
+          if (r < 0.4) { setPlayer(p => { p.potions += 1; return {...p}; }); addLog("Found a Potion in the chest!", "text-pink-400"); } 
+          else if (r < 0.8) { const amt = Math.floor(Math.random() * 40) + 20; setPlayer(p => { p.gold += amt; return {...p}; }); addLog(`Chest contained ${amt} Gold!`, "text-yellow-400"); } 
+          else {
+            const tDrops = NORMAL_DROPS[Math.min(3, Math.ceil(player.level / 2))]; const drop = tDrops[Math.floor(Math.random() * tDrops.length)];
+            setPendingLoot(drop); setGameState('LOOT'); return; 
+          }
+        }
+
+        if (tile === 'O') { setGameState('TOWN'); addLog("Entered Sanctuary Town.", "text-yellow-300"); } 
+        else if (tile === 'S') { setGameState('MYSTICAL_SHOP'); addLog("You found the hidden Mystical Shop!", "text-fuchsia-400 font-bold"); }
+        else if (tile === 'B') challengeBoss();
+        else if (['1', '2', '3', '4', '5', '6', 'X'].includes(tile)) challengeElite(tile);
+        else if (['C', '_'].includes(tile) && Math.random() < 0.10) generateEnemy('cave'); 
+        else if (tile === 'D' && Math.random() < 0.10) generateEnemy('demon');
+        else if (tile === 'T' && Math.random() < 0.12) generateEnemy('forest');
+        else if (tile === '~' && Math.random() < 0.12) generateEnemy('sea'); 
+        else if (tile === '.' && Math.random() < 0.06) generateEnemy('grass');
+      }, [gameState, activeMenu, player.level, worldMap, treasures, player.weapon, player.armor, player.hasBoat, player.hp]);
+
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (gameState !== 'EXPLORE' || activeMenu) return;
+          switch(e.key) {
+            case 'ArrowUp': case 'w': case 'W': move(0, -1); break;
+            case 'ArrowDown': case 's': case 'S': move(0, 1); break;
+            case 'ArrowLeft': case 'a': case 'A': move(-1, 0); break;
+            case 'ArrowRight': case 'd': case 'D': move(1, 0); break;
+            default: break;
+          }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [gameState, activeMenu, move]);
+
+      const generateEnemy = (zone) => {
+        let pool = ENEMIES.filter(e => player.level >= e.minLevel - 1);
+        const zonePool = pool.filter(e => e.zone === zone);
+        if (zonePool.length > 0) pool = zonePool; 
+        
+        if (pool.length === 0) return;
+        const template = pool[Math.floor(Math.random() * pool.length)];
+        
+        setCurrentEnemy({ ...template, maxHp: template.hp, isDead: false });
+        setFightingEliteId(null); setPlayer(p => ({ ...p, ultCooldown: 0, hasRevivedThisBattle: false })); setShowQuiz(false); setIsActionLocked(false);
+        setGameState('COMBAT'); addLog(`A wild ${template.name} appeared!`, getDifficultyColor(template, player));
+      };
+
+      const challengeElite = (eliteId) => {
+        const template = ELITES[eliteId]; 
+        if (!template) return;
+        setCurrentEnemy({ ...template, maxHp: template.hp, isDead: false });
+        setFightingEliteId(eliteId); setPlayer(p => ({ ...p, ultCooldown: 0, hasRevivedThisBattle: false })); setShowQuiz(false); setIsActionLocked(false);
+        setGameState('COMBAT'); addLog(`ELITE ENCOUNTER: ${template.name}!`, 'text-fuchsia-500 font-bold');
+      };
+
+      const challengeBoss = () => {
+        setCurrentEnemy({ ...BOSS, maxHp: BOSS.hp, isDead: false }); setFightingEliteId(null); setPlayer(p => ({ ...p, ultCooldown: 0, hasRevivedThisBattle: false })); setShowQuiz(false); setIsActionLocked(false);
+        setGameState('COMBAT'); addLog(`Barrier shattered! Prepare for the ${BOSS.name}!`, 'text-red-500 font-bold uppercase');
+      };
+
+      const triggerScienceChallenge = () => {
+        if (isActionLocked) return;
+        const nextQ = getNextScienceQuestion();
+        if (!nextQ) return; 
+        const shuffledOptions = [...nextQ.options].sort(() => Math.random() - 0.5);
+        setQuizProblem({ q: nextQ.q, options: shuffledOptions, correct: nextQ.correct, topic: nextQ.topic });
+        setShowQuiz(true);
+      };
+
+      const handleQuizAnswer = (chosenOption) => {
+        const isCorrect = chosenOption === quizProblem.correct;
+        
+        let p = { ...player };
+        if (quizProblem) {
+          p.answers = [...(p.answers || []), { q: quizProblem.q, topic: quizProblem.topic, isCorrect }];
+          if (!isCorrect) {
+            setMistakeLog(prev => {
+              if (prev.some(m => m.q === quizProblem.q)) return prev;
+              return [...prev, { q: quizProblem.q, correct: quizProblem.correct, chosen: chosenOption }];
+            });
+          }
+        }
+        setPlayer(p); 
+        setShowQuiz(false);
+
+        if (quizType === 'ATTACK') {
+          executeCombatAction('ATTACK', isCorrect, p);
+        } else if (quizType === 'ULTIMATE_1') {
+          if (isCorrect) {
+            setUltAnswers([true]);
+            addLog('Correct! One more question to charge ultimate...', 'text-yellow-300 font-bold');
+            setQuizType('ULTIMATE_2');
+            setTimeout(() => { triggerScienceChallenge(); }, 400); 
+          } else {
+            executeCombatAction('ULTIMATE', false, p);
+          }
+        } else if (quizType === 'ULTIMATE_2') {
+           executeCombatAction('ULTIMATE', isCorrect, p);
+        }
+      };
+
+      const executeCombatAction = (type, isCorrect = null, updatedPlayer = player) => {
+        if (isActionLocked || !currentEnemy || currentEnemy.isDead) return; 
+        setIsActionLocked(true); 
+
+        let p = { ...updatedPlayer }; let e = { ...currentEnemy }; let turnPassed = true;
+        let didDamageThisTurn = false;
+        
+        if (type === 'ATTACK') {
+          if (isCorrect) {
+            sfx.attack(); triggerScreenVFX('shake-enemy', 800); triggerOverlayVFX('attack', 600);
+            const pDmg = calculateDamage(totalAtk, e.def); e.hp -= pDmg; 
+            didDamageThisTurn = true;
+            addLog(`Used ${CLASSES[p.charClass].basicAttackName} for ${pDmg} DMG!`, 'text-gray-100');
+          } else {
+            addLog(`${CLASSES[p.charClass].basicAttackName} missed! Focus faltered...`, 'text-gray-500');
+            didDamageThisTurn = false;
+          }
+        } else if (type === 'POTION') {
+          if (p.potions <= 0) { setIsActionLocked(false); return; } 
+          sfx.potion(); triggerScreenVFX('flash-green', 1000); triggerOverlayVFX('heal', 1600);
+          p.potions -= 1; const heal = Math.floor(p.maxHp * 0.5); p.hp = Math.min(p.maxHp, p.hp + heal); 
+          addLog(`Recovered ${heal} HP.`, 'text-green-400');
+          didDamageThisTurn = false; 
+        } else if (type === 'ULTIMATE') {
+          p.ultCooldown = (p.weapon?.allowsUltEveryTurn || p.armor?.allowsUltEveryTurn || p.necklace?.allowsUltEveryTurn) ? 0 : 3; 
+          const successChance = isCorrect ? 1.0 : 0.20; 
+          
+          if (isCorrect) {
+            addLog(`Correct Answers! Limit Break!`, 'text-yellow-300 font-bold');
+          } else {
+            addLog(`Wrong Answer! Focus faltered...`, 'text-gray-500 font-bold');
+          }
+
+          if (Math.random() <= successChance) {
+            sfx.ultimate(); triggerScreenVFX('flash-ult', 1200); triggerScreenVFX('shake-enemy', 1400); triggerOverlayVFX('ultimate', 1400);
+            didDamageThisTurn = true; 
+            
+            const strikes = (p.weapon?.doubleUlt || p.armor?.doubleUlt || p.necklace?.doubleUlt) ? 2 : 1;
+            for(let i=0; i<strikes; i++) {
+              setTimeout(() => {
+                if (e.hp <= 0) return;
+                const pDmg = calculateDamage(totalAtk * 3, e.def); e.hp -= pDmg;
+                addLog(`${i>0?'Double Strike! ':''}Unleashed ${CLASSES[p.charClass].ultName} for ${pDmg} DMG!`, 'text-purple-400 font-bold uppercase');
+                setCurrentEnemy({...e});
+              }, i * 600);
+            }
+          } else { 
+            addLog(`${CLASSES[p.charClass].ultName} misfired!`, 'text-gray-500'); 
+            didDamageThisTurn = false; 
+          }
+        } else if (type === 'FLEE') {
+          sfx.flee(); addLog("Ran away!","text-gray-400"); setFightingEliteId(null); setIsActionLocked(false); setGameState('EXPLORE'); return;
+        }
+
+        setTimeout(() => {
+          if (p.hp > 0 && e.hp > 0 && p.necklace?.regen) {
+            p.hp = Math.min(p.maxHp, p.hp + p.necklace.regen);
+            addLog(`Necklace regenerated ${p.necklace.regen} HP.`, 'text-green-300');
+          }
+
+          if (e.hp <= 0 && !e.isDead) {
+            e.hp = 0; e.isDead = true; setCurrentEnemy(e);
+            sfx.defeat(); triggerScreenVFX('shake-enemy', 800);
+            
+            addLog(`Defeated ${e.name}! Got ${e.exp} EXP, ${e.gold} G.`, 'text-yellow-400');
+            p.exp += e.exp; p.gold += e.gold; 
+
+            let droppedLoot = null;
+            if (e.isElite) {
+              droppedLoot = e.magicDrop;
+            } else if (!e.isBoss) {
+              if (Math.random() < 0.35) {
+                if (Math.random() < 0.4) { p.potions += 1; addLog(`Dropped a Potion!`, 'text-pink-400'); }
+                else {
+                  const tDrops = NORMAL_DROPS[e.dropTier] || NORMAL_DROPS[1];
+                  droppedLoot = tDrops[Math.floor(Math.random() * tDrops.length)];
+                }
+              }
+            }
+
+            if (fightingEliteId) { setWorldMap(prev => { const nm = [...prev]; nm[posRef.current.y][posRef.current.x] = fightingEliteId === '1' ? '_' : '.'; return nm; }); }
+            
+            let nextLvExp = EXP_REQUIREMENTS[p.level] || (p.level * 1000);
+            let leveledUp = false;
+            while (p.exp >= nextLvExp) {
+              leveledUp = true; p.level += 1;
+              const growth = CLASSES[p.charClass]; p.maxHp += growth.hpGrow; p.atk += growth.atkGrow; p.def += growth.defGrow; 
+              addLog(`LEVEL UP! Reached Level ${p.level}!`, 'text-cyan-400 font-bold'); nextLvExp = EXP_REQUIREMENTS[p.level] || (p.level * 1000);
+            }
+            
+            setPlayer(p);
+            setTimeout(() => {
+              if(leveledUp) sfx.levelUp();
+              setIsActionLocked(false); 
+              if (droppedLoot) {
+                setPendingLoot(droppedLoot); setGameState('LOOT');
+              } else if (e.isBoss) {
+                setGameState('VICTORY');
+              } else {
+                setGameState('EXPLORE');
+              }
+            }, 1500); 
+
+            return;
+          }
+
+          if (turnPassed && e.hp > 0 && !e.isDead) {
+            setTimeout(() => {
+              if (e.isDead) { setIsActionLocked(false); return; }
+
+              if (e.name === 'Apex Chimera' && !didDamageThisTurn && e.hp < e.maxHp) {
+                e.hp = e.maxHp;
+                triggerScreenVFX('flash-green', 800);
+                addLog(`The Apex Chimera sensed your hesitation and fully healed!`, 'text-fuchsia-400 font-black uppercase');
+              }
+
+              let eDmg = calculateDamage(e.atk, totalDef);
+              if (e.name === 'Apex Chimera') {
+                 eDmg = Math.floor(p.maxHp * 0.60); 
+              }
+
+              p.hp -= eDmg;
+              triggerScreenVFX('flash-red', 800); triggerOverlayVFX('enemy-slash', 600);
+
+              if (e.name === 'Apex Chimera') {
+                addLog(`Apex Chimera's roar crushes you for ${eDmg} DMG (60% Max HP)!`, 'text-red-500 font-bold');
+              } else {
+                addLog(`${e.name} hit you for ${eDmg} DMG.`, 'text-red-400');
+              }
+              
+              if (p.hp <= 0) {
+                if (p.necklace?.hasRevive && !p.hasRevivedThisBattle) {
+                  p.hp = p.maxHp;
+                  p.hasRevivedThisBattle = true;
+                  sfx.potion();
+                  triggerScreenVFX('flash-green', 1000);
+                  addLog(`🔥 PHOENIX TEAR ACTIVATED! You rise from the ashes!`, 'text-yellow-400 font-black');
+                } else {
+                  sfx.defeat(); setPlayer(p); addLog(`You were slain...`, 'text-red-600 font-bold');
+                  setTimeout(() => { setIsActionLocked(false); setGameState('GAME_OVER'); }, 2000); return;
+                }
+              }
+              setPlayer(p); setCurrentEnemy(e);
+              setIsActionLocked(false); 
+            }, 700); 
+            if (p.ultCooldown > 0) p.ultCooldown -= 1;
+          }
+        }, (p.weapon?.doubleUlt || p.armor?.doubleUlt || p.necklace?.doubleUlt) && type === 'ULTIMATE' && didDamageThisTurn ? 800 : 0); 
+      };
+
+      const buyItem = (type, item) => {
+        if (player.gold >= item.cost) {
+          if(type === 'consumable') {
+            setPlayer({ ...player, gold: player.gold - item.cost, hp: player.maxHp, potions: player.potions + 1 });
+            addLog(`Bought ${item.name}! HP maxed!`, "text-yellow-300"); sfx.potion();
+          } else if (type === 'keyItem') {
+            setPlayer({ ...player, gold: player.gold - item.cost, hasBoat: true });
+            addLog(`Bought ${item.name}! You can now sail the sea!`, "text-blue-300 font-bold"); sfx.potion();
+          } else {
+            if (player.inventory.length >= 10) { addLog("Bag is full!", "text-red-400"); return; }
+            setPlayer({ ...player, gold: player.gold - item.cost, inventory: [...player.inventory, item] }); 
+            addLog(`Bought ${item.name}! Sent to bag.`, "text-yellow-300"); sfx.potion();
+          }
+        } else addLog("Not enough Gold.", "text-red-400");
+      };
+
+      const handleLootDecision = (action) => {
+        if (action === 'TAKE') {
+          if (player.inventory.length >= 10) return; 
+          setPlayer(p => ({ ...p, inventory: [...p.inventory, pendingLoot] }));
+          addLog(`Took ${pendingLoot.name} into Bag!`, 'text-green-400');
+        } else {
+          const scrapValue = pendingLoot.cost ? Math.floor(pendingLoot.cost / 4) : (pendingLoot.atk > 60 || pendingLoot.def > 50 || pendingLoot.regen > 10 ? 200 : 30);
+          setPlayer(p => ({ ...p, gold: p.gold + scrapValue }));
+          addLog(`Scrapped item for ${scrapValue} Gold.`, 'text-yellow-500');
+        }
+        setPendingLoot(null);
+        setGameState('EXPLORE');
+      };
+
+      const usePotionOverworld = () => {
+        if (player.potions > 0 && player.hp < player.maxHp) {
+          sfx.potion();
+          const heal = Math.floor(player.maxHp * 0.5);
+          setPlayer(p => ({ ...p, potions: p.potions - 1, hp: Math.min(p.maxHp, p.hp + heal) }));
+          addLog(`Used potion. Recovered ${heal} HP.`, 'text-green-400');
+        } else if (player.hp >= player.maxHp) {
+          addLog(`HP is already full.`, 'text-gray-400');
+        }
+      };
+
+      const equipItemFromBag = (index) => {
+        const itemToEquip = player.inventory[index];
+        const slot = itemToEquip.type; 
+        const currentEquipped = player[slot];
+        
+        let newInventory = [...player.inventory];
+        newInventory.splice(index, 1);
+        if (currentEquipped) newInventory.push(currentEquipped);
+        
+        sfx.attack();
+        setPlayer(p => ({ ...p, [slot]: itemToEquip, inventory: newInventory }));
+        addLog(`Equipped ${itemToEquip.name}.`, 'text-blue-400');
+      };
+
+      const unequipItem = (slot) => {
+        const currentEquipped = player[slot];
+        if (!currentEquipped) return;
+        if (player.inventory.length >= 10) { addLog("Bag is full! Cannot unequip.", "text-red-400"); return; }
+        
+        sfx.potion();
+        setPlayer(p => ({ ...p, [slot]: null, inventory: [...p.inventory, currentEquipped] }));
+        addLog(`Unequipped ${currentEquipped.name}.`, 'text-gray-400');
+      };
+
+      const dropItem = (index) => {
+        const item = player.inventory[index];
+        let newInventory = [...player.inventory];
+        newInventory.splice(index, 1);
+        setPlayer(p => ({ ...p, inventory: newInventory }));
+        addLog(`Dropped ${item.name}.`, 'text-gray-400');
+      };
+
+      const renderMapTiles = () => {
+        if (!worldMap || worldMap.length === 0) return null; 
+        const tiles = [];
+        for (let y = playerPos.y - 4; y <= playerPos.y + 4; y++) {
+          for (let x = playerPos.x - 4; x <= playerPos.x + 4; x++) {
+            
+            let wrappedX = ((x % MAP_SIZE) + MAP_SIZE) % MAP_SIZE;
+            let wrappedY = ((y % MAP_SIZE) + MAP_SIZE) % MAP_SIZE;
+            
+            let tile = worldMap[wrappedY][wrappedX];
+            let bg = 'bg-black', icon = '';
+
+            if (tile === '.') bg = 'terrain-grass';
+            else if (tile === 'T') bg = 'terrain-forest';
+            else if (tile === 'M') bg = 'terrain-mountain';
+            else if (tile === 'W') bg = 'bg-[#3a86ff]'; 
+            else if (tile === 'O') { bg = 'terrain-path'; icon = '🛖'; } 
+            else if (tile === 'D') bg = 'terrain-demon';
+            else if (tile === 'L') bg = 'terrain-lava';
+            else if (tile === '~') bg = 'terrain-water';
+            else if (tile === 'B') { bg = 'terrain-demon'; icon = '🏰'; } 
+            else if (tile === 'i') { bg = 'terrain-path'; icon = '🪧'; }
+            else if (tile === 'C') { bg = 'terrain-cave'; icon = '🕳️'; } 
+            else if (tile === '_') bg = 'terrain-cave';
+            
+            else if (tile === '1') { bg = 'terrain-cave'; icon = <span className="animate-pulse drop-shadow-lg text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🦖</span>; }
+            else if (tile === '2') { bg = 'terrain-demon'; icon = <span className="animate-pulse drop-shadow-lg text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🦍</span>; }
+            else if (tile === '3') { bg = 'terrain-forest'; icon = <span className="animate-pulse drop-shadow-lg text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🌳</span>; }
+            else if (tile === '4') { bg = 'terrain-mountain'; icon = <span className="animate-pulse drop-shadow-lg text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🗿</span>; }
+            else if (tile === '5') { bg = 'terrain-water'; icon = <span className="animate-pulse drop-shadow-lg text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🧜‍♀️</span>; }
+            else if (tile === '6') { bg = 'terrain-lava'; icon = <span className="animate-pulse drop-shadow-lg text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🦅</span>; }
+            else if (tile === 'X') { bg = 'terrain-grass'; icon = <span className="animate-pulse drop-shadow-lg text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🐉</span>; }
+            else if (tile === 'S') { bg = 'bg-purple-900 shadow-[inset_0_0_20px_rgba(255,0,255,0.5)]'; icon = <span className="animate-pulse text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🌌</span>; }
+
+            if (treasures.find(t => t.x === wrappedX && t.y === wrappedY)) icon = <span className="drop-shadow-md text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🎁</span>;
+
+            if (x === playerPos.x && y === playerPos.y) icon = <HeroSprite tunicColor={CLASSES[player.charClass]?.color} boat={player.hasBoat && worldMap[wrappedY]?.[wrappedX] === '~'} />;
+            
+            tiles.push(<div key={`${x}-${y}`} className={`${bg} flex items-center justify-center border border-black/20 select-none shadow-[inset_0_0_8px_rgba(0,0,0,0.4)]`} style={{ width: '11.1111%', height: '11.1111%' }}>{icon}</div>);
+          }
+        }
+        return tiles;
+      };
+
+      const renderMiniMap = () => {
+        if (!worldMap || worldMap.length === 0) return null; 
+        return (
+          <div className="grid border-2 border-gray-600 bg-black p-1" style={{ gridTemplateColumns: `repeat(${MAP_SIZE}, minmax(0, 1fr))` }}>
+            {worldMap.map((row, y) => row.map((tile, x) => {
+              let bg = 'bg-gray-800';
+              if (x === playerPos.x && y === playerPos.y) bg = 'bg-white animate-pulse'; 
+              else if (tile === '.') bg = 'bg-green-600';
+              else if (tile === 'T') bg = 'bg-green-800';
+              else if (tile === 'M') bg = 'bg-gray-500';
+              else if (tile === '~') bg = 'bg-blue-800';
+              else if (tile === 'D') bg = 'bg-red-900';
+              else if (tile === 'L') bg = 'bg-red-500'; 
+              else if (tile === 'O') bg = 'bg-yellow-400';
+              else if (tile === 'i') bg = 'bg-yellow-200';
+              else if (tile === 'B') bg = 'bg-red-600';
+              else if (tile === 'S') bg = 'bg-purple-500';
+              else if (['1','2','3','4','6','X'].includes(tile)) bg = 'bg-orange-500';
+              else if (tile === '5') bg = 'bg-cyan-400';
+              else if (tile === '_' || tile === 'C') bg = 'bg-gray-700';
+              
+              return <div key={`${x}-${y}`} className={`w-[3px] h-[3px] md:w-1 md:h-1 lg:w-[5px] lg:h-[5px] ${bg}`} />
+            }))}
+          </div>
+        )
+      };
+
+      return (
+        <div className="h-screen bg-gray-950 text-white font-mono flex flex-col items-center overflow-hidden w-full relative">
+
+          <button onClick={() => { setForceRender(Math.random()); setLocalIsMuted(toggleMute()); if(!isMuted && gameState === 'EXPLORE') playMusic('explore'); }} className="absolute top-2 left-2 z-50 bg-black/50 p-2 md:p-3 rounded-full border border-gray-600 hover:bg-black transition-colors cursor-pointer">
+            {localIsMuted ? <VolumeXIcon size={24} className="text-red-400"/> : <Volume2Icon size={24} className="text-green-400"/>}
+          </button>
+
+          {/* MENU MODAL (INVENTORY & MISTAKES) */}
+          {activeMenu && (
+            <div className="absolute inset-0 bg-black/85 flex items-center justify-center z-[110] p-4">
+              <div className="pixel-panel flex flex-col bg-blue-950 p-4 w-full max-w-[600px] max-h-[90vh]">
+                
+                {/* Menu Tabs */}
+                <div className="flex gap-2 border-b-2 border-blue-800 pb-3 mb-4">
+                  <button onClick={() => setActiveMenu('INVENTORY')} className={`pixel-font flex-1 p-3 text-[10px] text-white border-2 cursor-pointer ${activeMenu === 'INVENTORY' ? 'bg-blue-600 border-white' : 'bg-black border-gray-600'}`}>🎒 BAG</button>
+                  <button onClick={() => setActiveMenu('MISTAKES')} className={`pixel-font flex-1 p-3 text-[10px] text-white border-2 cursor-pointer ${activeMenu === 'MISTAKES' ? 'bg-blue-600 border-white' : 'bg-black border-gray-600'}`}>📚 LOG</button>
+                  <button onClick={() => setActiveMenu('REPORT')} className={`pixel-font flex-1 p-3 text-[10px] text-white border-2 cursor-pointer ${activeMenu === 'REPORT' ? 'bg-blue-600 border-white' : 'bg-black border-gray-600'}`}>📊 REPORT</button>
+                </div>
+
+                {/* INVENTORY CONTENT */}
+                {activeMenu === 'INVENTORY' && (
+                  <div className="scrollable custom-scroll flex-1 overflow-y-auto pr-2">
+                    <div className="flex justify-between items-center bg-black p-3 border-2 border-gray-600 mb-4">
+                      <div className="text-pink-400 font-bold">🧪 Potions: {player.potions}</div>
+                      <button onClick={usePotionOverworld} disabled={player.potions <= 0 || player.hp >= player.maxHp} className="pixel-btn bg-pink-600 text-white text-[10px] px-3 py-1 cursor-pointer">USE</button>
+                    </div>
+
+                    <h3 className="pixel-font text-[10px] text-yellow-300 mb-2">EQUIPPED:</h3>
+                    <div className="flex flex-col gap-2 mb-4">
+                      <div className="flex justify-between items-center bg-black p-2 border border-gray-700">
+                        <div className="text-xs text-white"><span className="text-gray-400">WPN:</span> {player.weapon ? `${player.weapon.name} (+${player.weapon.atk})` : 'None'}</div>
+                        {player.weapon && <button onClick={() => unequipItem('weapon')} className="bg-gray-600 text-white text-[10px] px-2 py-1 border border-white cursor-pointer">UNEQUIP</button>}
+                      </div>
+                      <div className="flex justify-between items-center bg-black p-2 border border-gray-700">
+                        <div className="text-xs text-white"><span className="text-gray-400">AMR:</span> {player.armor ? `${player.armor.name} (+${player.armor.def})` : 'None'}</div>
+                        {player.armor && <button onClick={() => unequipItem('armor')} className="bg-gray-600 text-white text-[10px] px-2 py-1 border border-white cursor-pointer">UNEQUIP</button>}
+                      </div>
+                      <div className="flex justify-between items-center bg-black p-2 border border-gray-700">
+                        <div className="text-xs text-white"><span className="text-gray-400">NCK:</span> {player.necklace ? `${player.necklace.name}` : 'None'}</div>
+                        {player.necklace && <button onClick={() => unequipItem('necklace')} className="bg-gray-600 text-white text-[10px] px-2 py-1 border border-white cursor-pointer">UNEQUIP</button>}
+                      </div>
+                    </div>
+
+                    <h3 className="pixel-font text-[10px] text-yellow-300 mb-2">BAG ({player.inventory.length}/10):</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Array(10).fill(0).map((_, i) => {
+                        const item = player.inventory[i];
+                        if (item) {
+                           return (
+                             <div key={i} className="bg-black border border-gray-500 p-2 flex flex-col">
+                               <div className="font-bold text-xs text-white mb-1 truncate">{item.name}</div>
+                               <div className="text-[10px] text-green-400 mb-2">
+                                 {item.atk && `+${item.atk} ATK`}
+                                 {item.def && `+${item.def} DEF`}
+                                 {item.regen && `+${item.regen} Reg`}
+                               </div>
+                               <div className="flex gap-1 mt-auto">
+                                 <button onClick={()=>equipItemFromBag(i)} className="flex-1 bg-green-600 text-white text-[10px] p-1 border border-white cursor-pointer">EQUIP</button>
+                                 <button onClick={()=>dropItem(i)} className="flex-1 bg-red-700 text-white text-[10px] p-1 border border-white cursor-pointer">DROP</button>
+                               </div>
+                             </div>
+                           )
+                        } else {
+                           return <div key={i} className="bg-black border border-dashed border-gray-700 p-2 flex items-center justify-center text-gray-500 text-[10px] h-20">EMPTY</div>
+                        }
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* MISTAKES CONTENT */}
+                {activeMenu === 'MISTAKES' && (
+                  <div className="scrollable custom-scroll flex-1 bg-black border-2 border-gray-600 p-3 overflow-y-auto">
+                    {mistakeLog.length === 0 ? (
+                      <p className="text-gray-400 text-center mt-5 text-sm">No mistakes recorded yet! Great job!</p>
+                    ) : (
+                      mistakeLog.map((m, idx) => (
+                        <div key={idx} className="mb-3 pb-3 border-b border-gray-700">
+                          <p className="text-white text-sm font-bold mb-1 leading-relaxed">Q: {m.q}</p>
+                          <p className="text-red-400 text-xs mb-1">❌ Your Answer: {m.chosen}</p>
+                          <p className="text-green-400 text-xs">✅ Correct Answer: {m.correct}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* REPORT CONTENT */}
+                {activeMenu === 'REPORT' && (
+                  <div className="scrollable custom-scroll flex-1 bg-black border-2 border-gray-600 p-3 overflow-y-auto flex flex-col">
+                    {(() => {
+                      const playTimeSeconds = Math.floor((Date.now() - (player.startTime || Date.now())) / 1000);
+                      const mins = Math.floor(playTimeSeconds / 60);
+                      const secs = playTimeSeconds % 60;
+                      const timeString = `${mins}m ${secs}s`;
+                      
+                      let reportText = `--- HERO'S ASCENT REPORT ---\n`;
+                      reportText += `Name: ${player.name}\n`;
+                      reportText += `Class: ${player.charClass}\n`;
+                      reportText += `Level: ${player.level}\n`;
+                      reportText += `Time Played: ${timeString}\n\n`;
+                      
+                      reportText += `--- MISTAKES LOG ---\n`;
+                      if (mistakeLog.length === 0) {
+                        reportText += `No mistakes recorded. Excellent job!\n`;
+                      } else {
+                        mistakeLog.forEach((m, idx) => {
+                          reportText += `${idx + 1}. Q: ${m.q}\n   ❌ Student's Answer: ${m.chosen}\n\n`;
+                        });
+                      }
+                      
+                      const copyToClipboard = () => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = reportText;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        try {
+                          document.execCommand('copy');
+                          addLog("Report copied to clipboard!", "text-green-400");
+                        } catch (err) {
+                          addLog("Copy failed. Please manually select the text.", "text-red-400");
+                        }
+                        document.body.removeChild(textarea);
+                      };
+
+                      return (
+                        <React.Fragment>
+                          <p className="text-white text-sm mb-2 font-sans font-bold">Teacher Export Data:</p>
+                          <textarea readOnly value={reportText} className="w-full h-48 bg-gray-900 text-green-400 text-xs p-2 border border-gray-700 mb-3 resize-none font-mono" />
+                          <button onClick={copyToClipboard} className="pixel-btn bg-green-600 text-white w-full text-sm mt-auto cursor-pointer">COPY REPORT</button>
+                        </React.Fragment>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                <button onClick={() => setActiveMenu(null)} className="pixel-btn bg-gray-600 text-white mt-4 text-sm w-full shrink-0 cursor-pointer">CLOSE</button>
+              </div>
+            </div>
+          )}
+
+          {confirmReset && (
+            <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[100]">
+              <div className="bg-red-950 p-6 md:p-8 border-4 border-white pixel-panel text-center max-w-sm w-full mx-4">
+                <h2 className="text-xl md:text-2xl text-yellow-300 pixel-font mb-4">RESET GAME?</h2>
+                <p className="text-sm md:text-base font-sans mb-6 text-white">All unsaved progress will be lost permanently.</p>
+                <div className="flex gap-4 justify-center">
+                  <button onClick={executeReset} className="pixel-btn bg-red-600 hover:bg-red-500 text-sm text-white cursor-pointer">YES</button>
+                  <button onClick={() => setConfirmReset(false)} className="pixel-btn bg-gray-600 hover:bg-gray-500 text-sm text-white cursor-pointer">NO</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {overlayVfx === 'heal' && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 vfx-heal text-green-400 text-5xl md:text-7xl font-bold font-sans">✨💚✨</div>}
+          {overlayVfx === 'enemy-slash' && <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 vfx-claw text-red-600 text-[10rem] md:text-[14rem]">🩸</div>}
+
+          <div className="w-full h-full flex flex-col items-center justify-center" style={{ transform: 'scale(0.9)', transformOrigin: 'center center' }}>
+
+            {gameState === 'START' && (
+              <div className="flex-1 flex flex-col items-center justify-center p-4 text-center w-full">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl mb-8 pixel-font text-yellow-400 drop-shadow-[4px_4px_0_rgba(220,38,38,1)] leading-tight">HERO'S<br/>ASCENT</h1>
+                <p className="max-w-md lg:max-w-xl mb-12 text-gray-400 pixel-font text-sm md:text-base lg:text-lg leading-loose">Choose your Science level & topics. Slay the Apex Chimera using the power of knowledge!</p>
+                <div className="flex flex-col gap-4 w-full max-w-xs">
+                  <button onClick={startGame} className="pixel-btn bg-red-600 hover:bg-red-500 text-xl md:text-2xl lg:text-3xl p-4 md:p-6 text-white animate-pulse cursor-pointer">NEW GAME</button>
+                  {hasSave && <button onClick={loadGame} className="pixel-btn bg-blue-600 hover:bg-blue-500 text-xl md:text-2xl lg:text-3xl p-4 md:p-6 text-white cursor-pointer">CONTINUE</button>}
+                </div>
+              </div>
+            )}
+
+            {gameState === 'CREATE' && (
+              <div className="flex-1 flex items-center justify-center p-4 w-full">
+                <form onSubmit={createCharacter} className="bg-blue-950 p-6 md:p-8 lg:p-10 pixel-panel max-w-lg lg:max-w-2xl w-full">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl text-yellow-400 mb-6 lg:mb-8 pixel-font text-center">New Game</h2>
+                  
+                  <label className="block text-gray-300 mb-2 pixel-font text-xs md:text-sm lg:text-base">Name</label>
+                  <input name="name" defaultValue="Hero" maxLength={10} className="w-full bg-black border-2 border-gray-500 p-3 md:p-4 mb-4 lg:mb-6 text-white focus:outline-none focus:border-white uppercase text-sm md:text-base" />
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                     <div>
+                        <label className="block text-gray-300 mb-1 md:mb-2 pixel-font text-[10px] md:text-sm">Max Syllabus Grade</label>
+                        <select name="quizLevel" value={selectedGrade} onChange={handleGradeChange} className="w-full bg-black border-2 border-gray-500 p-2 md:p-3 text-white focus:outline-none focus:border-white uppercase pixel-font text-[8px] md:text-xs cursor-pointer">
+                          <option value="P3">Primary 3</option>
+                          <option value="P4">Primary 4</option>
+                          <option value="P5">Primary 5</option>
+                          <option value="P6">Primary 6</option>
+                        </select>
+                     </div>
+                     <div>
+                        <label className="block text-gray-300 mb-1 md:mb-2 pixel-font text-[10px] md:text-sm">Select Topics</label>
+                        <div className="bg-black border-2 border-gray-500 p-2 md:p-3 h-24 md:h-32 overflow-y-auto custom-scroll">
+                           {availableGrades.slice(0, availableGrades.indexOf(selectedGrade) + 1).map(grade => (
+                              <div key={grade} className="mb-2">
+                                 <div className="text-yellow-400 text-[10px] md:text-xs font-bold mb-1 underline">{grade} Topics</div>
+                                 {Object.keys(QUESTION_BANKS[grade] || {}).map(topic => {
+                                    const tId = `${grade}|${topic}`;
+                                    return (
+                                       <label key={tId} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-800 p-1">
+                                          <input 
+                                             type="checkbox" 
+                                             checked={selectedTopics.includes(tId)} 
+                                             onChange={() => {
+                                                setSelectedTopics(prev => prev.includes(tId) ? prev.filter(t => t !== tId) : [...prev, tId])
+                                             }} 
+                                             className="w-3 h-3 md:w-4 md:h-4 accent-red-600 cursor-pointer"
+                                          />
+                                          <span className="text-[8px] md:text-[10px] text-white uppercase truncate cursor-pointer">{topic}</span>
+                                       </label>
+                                    )
+                                 })}
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+                  </div>
+
+                  <label className="block text-gray-300 mb-2 pixel-font text-xs md:text-sm lg:text-base">Gender</label>
+                  <div className="flex gap-4 mb-6 lg:mb-8">
+                    <label className="flex-1 cursor-pointer"><input type="radio" name="gender" value="Male" defaultChecked className="peer sr-only"/>
+                      <div className="text-center p-3 md:p-4 border-2 border-gray-600 bg-black peer-checked:bg-blue-600 peer-checked:border-white uppercase text-sm md:text-base lg:text-lg">Male</div>
+                    </label>
+                    <label className="flex-1 cursor-pointer"><input type="radio" name="gender" value="Female" className="peer sr-only"/>
+                      <div className="text-center p-3 md:p-4 border-2 border-gray-600 bg-black peer-checked:bg-pink-600 peer-checked:border-white uppercase text-sm md:text-base lg:text-lg">Female</div>
+                    </label>
+                  </div>
+                  
+                  <label className="block text-gray-300 mb-2 pixel-font text-xs md:text-sm lg:text-base">Class</label>
+                  <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8 lg:mb-10">
+                    {Object.keys(CLASSES).map((cls) => (
+                      <label key={cls} className="cursor-pointer"><input type="radio" name="charClass" value={cls} defaultChecked={cls==='Warrior'} className="peer sr-only"/>
+                        <div className="text-center p-3 md:p-4 border-2 border-gray-600 bg-black peer-checked:bg-gray-700 peer-checked:border-yellow-400 uppercase text-sm md:text-base lg:text-lg">
+                          {cls} <br/><span className="text-[8px] md:text-[10px] lg:text-xs text-gray-400 mt-1 block">Atk: {CLASSES[cls].basicAttackName}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <button type="submit" disabled={selectedTopics.length === 0} className="w-full pixel-btn bg-red-600 hover:bg-red-500 text-white text-sm md:text-lg lg:text-xl py-4 disabled:bg-gray-700 disabled:text-gray-400 cursor-pointer">
+                    {selectedTopics.length === 0 ? "SELECT A TOPIC" : "ENTER WORLD"}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {(gameState === 'GAME_OVER' || gameState === 'VICTORY') && (
+              <div className="flex-1 flex flex-col items-center justify-center p-4 text-center w-full">
+                <h1 className={`text-5xl md:text-7xl lg:text-9xl mb-6 pixel-font ${gameState==='VICTORY'?'text-yellow-400':'text-red-600'} animate-bounce`}>{gameState === 'VICTORY' ? 'VICTORY!' : 'YOU DIED'}</h1>
+                <div className="text-9xl md:text-[10rem] lg:text-[12rem] mb-8">{gameState === 'VICTORY' ? '🏆' : '💀'}</div>
+                {gameState === 'GAME_OVER' && <p className="text-gray-400 mb-8 pixel-font text-sm md:text-base lg:text-lg leading-loose">Your experience remains, but half your gold was lost to the void.</p>}
+                <button onClick={() => gameState === 'VICTORY' ? setGameState('START') : respawnPlayer()} className="pixel-btn bg-gray-600 hover:bg-gray-500 text-white text-lg md:text-2xl p-4 md:p-6 cursor-pointer">
+                  {gameState === 'VICTORY' ? 'PLAY AGAIN' : 'RESPAWN'}
+                </button>
+              </div>
+            )}
+
+            {['EXPLORE', 'TOWN', 'SHOP', 'MYSTICAL_SHOP', 'COMBAT', 'LOOT'].includes(gameState) && (
+              <div className="w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-4 p-2 md:p-4 lg:p-6 h-full">
+                
+                <div className={`flex-1 flex items-center justify-center bg-gray-900 p-2 md:p-4 pixel-panel overflow-hidden relative min-h-[40vh] lg:min-h-0 ${screenVfx==='flash-red'?'flash-red-screen':''} ${screenVfx==='flash-ult'?'flash-ult-screen':''}`}>
+                  
+                  {['EXPLORE', 'LOOT'].includes(gameState) && (
+                    <>
+                      <div className="relative w-full max-w-[850px]">
+                        <div className="w-full pb-[100%]"></div>
+                        <div className="absolute inset-0 flex flex-wrap bg-black shadow-inner content-start">
+                          {renderMapTiles()}
+                        </div>
+                      </div>
+                      
+                      {/* FAIRY NPC OVERLAY */}
+                      {fairyActive && (
+                        <div className="absolute top-4 right-4 bg-white/95 border-4 border-pink-400 p-3 md:p-4 max-w-[200px] md:max-w-[280px] rounded-xl shadow-[4px_4px_0_rgba(0,0,0,0.5)] z-50 animate-bounce flex gap-2 items-start">
+                           <span className="text-3xl drop-shadow-md">🧚‍♀️</span>
+                           <p className="text-black font-bold text-sm md:text-base leading-tight monster-font">{fairyText}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {gameState === 'LOOT' && pendingLoot && (
+                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-6 z-40 animate-in zoom-in duration-300">
+                      <div className="bg-gray-800 border-4 border-yellow-500 p-6 md:p-8 max-w-sm md:max-w-md lg:max-w-lg w-full text-center shadow-[0_0_20px_rgba(234,179,8,0.5)]">
+                        <SparklesIcon className="mx-auto text-yellow-400 mb-4 animate-bounce" size={64} />
+                        <h2 className="text-xl md:text-2xl lg:text-3xl pixel-font text-yellow-300 mb-4 md:mb-6">ITEM FOUND!</h2>
+                        
+                        <div className="bg-gray-900 p-4 md:p-6 border border-gray-600 mb-6 lg:mb-8">
+                          <p className="text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 md:mb-4">{pendingLoot.name}</p>
+                          {pendingLoot.atk && <p className="text-base md:text-lg lg:text-xl text-green-400 font-bold">+{pendingLoot.atk} ATK</p>}
+                          {pendingLoot.def && <p className="text-base md:text-lg lg:text-xl text-blue-400 font-bold">+{pendingLoot.def} DEF</p>}
+                          {pendingLoot.regen && <p className="text-base md:text-lg lg:text-xl text-pink-400 font-bold">+{pendingLoot.regen} HP Regen/turn</p>}
+                          
+                          {pendingLoot.hasRevive && <p className="text-sm md:text-base lg:text-lg text-yellow-400 mt-2 font-bold">Effect: Auto-Revive once per battle</p>}
+                          {pendingLoot.doubleUlt && <p className="text-sm md:text-base lg:text-lg text-fuchsia-400 mt-2 font-bold">Effect: Double Ultimate Cast</p>}
+                          {pendingLoot.allowsUltEveryTurn && <p className="text-sm md:text-base lg:text-lg text-fuchsia-400 mt-2 font-bold">Effect: 0 Cooldown Ultimate</p>}
+                          
+                          <div className="text-[12px] md:text-sm lg:text-base text-gray-400 mt-4 border-t border-gray-700 pt-2 text-left">
+                            CURRENT EQUIPPED:<br/>
+                            {pendingLoot.type === 'weapon' ? (player.weapon ? `${player.weapon.name} (+${player.weapon.atk} ATK)` : 'None') : 
+                             pendingLoot.type === 'armor' ? (player.armor ? `${player.armor.name} (+${player.armor.def} DEF)` : 'None') : 
+                             (player.necklace ? `${player.necklace.name} (+${player.necklace.regen} Regen)` : 'None')}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3 md:gap-4">
+                          <button onClick={() => handleLootDecision('TAKE')} disabled={player.inventory.length >= 10} className="pixel-btn bg-green-600 hover:bg-green-500 w-full text-sm md:text-base lg:text-lg py-3 md:py-4 disabled:opacity-50 cursor-pointer">
+                            {player.inventory.length >= 10 ? 'BAG FULL' : 'TAKE ITEM'}
+                          </button>
+                          <button onClick={() => handleLootDecision('SCRAP')} className="pixel-btn bg-gray-600 hover:bg-gray-500 w-full text-sm md:text-base lg:text-lg py-3 md:py-4 cursor-pointer">
+                            SCRAP FOR GOLD
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {gameState === 'TOWN' && (
+                    <div className="text-center w-full animate-in fade-in zoom-in duration-300">
+                      <div className="text-6xl md:text-8xl lg:text-9xl mb-4 md:mb-8">🛖</div>
+                      <h2 className="text-2xl md:text-4xl lg:text-5xl text-yellow-500 mb-8 md:mb-12 pixel-font leading-loose">Sanctuary<br/>Town</h2>
+                      <div className="flex flex-col gap-4 max-w-[250px] md:max-w-[350px] mx-auto">
+                        <button onClick={() => { if(player.hp === player.maxHp) { addLog("Already full HP.", "text-gray-400"); return;} if(player.gold>=15){setPlayer({...player, hp:player.maxHp, gold:player.gold-15}); sfx.potion(); addLog("Rested at Inn.", "text-green-400");} else addLog("Not enough Gold.", "text-red-400"); }} className="pixel-btn bg-green-700 text-sm md:text-base lg:text-lg py-3 md:py-4 cursor-pointer">Inn (15G)</button>
+                        <button onClick={() => { if(player.gold>=25){setPlayer({...player, potions:player.potions+1, gold:player.gold-25}); sfx.potion(); addLog("Bought Potion.", "text-pink-400");} else addLog("Not enough Gold.", "text-red-400"); }} className="pixel-btn bg-pink-700 text-sm md:text-base lg:text-lg py-3 md:py-4 cursor-pointer">Potion (25G)</button>
+                        <button onClick={() => setGameState('SHOP')} className="pixel-btn bg-orange-700 text-sm md:text-base lg:text-lg py-3 md:py-4 cursor-pointer">Blacksmith</button>
+                        <button onClick={() => setGameState('EXPLORE')} className="pixel-btn bg-gray-600 mt-4 text-sm md:text-base lg:text-lg py-3 md:py-4 cursor-pointer">Leave Town</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {gameState === 'SHOP' && (
+                    <div className="w-full p-4 md:p-8 h-full flex flex-col animate-in fade-in">
+                      <h2 className="text-xl md:text-3xl lg:text-4xl text-orange-400 mb-6 md:mb-10 pixel-font text-center">Blacksmith</h2>
+                      <div className="flex-1 overflow-y-auto space-y-6 md:space-y-8 pr-2 md:pr-4 custom-scroll">
+                        <div>
+                          <h3 className="text-base md:text-lg lg:text-xl text-gray-400 mb-2 md:mb-4 font-bold uppercase border-b border-gray-600 pb-2">Weapons (ATK)</h3>
+                          {SHOP_ITEMS.weapons.map(w => (
+                            <div key={w.name} className="flex justify-between items-center bg-black p-3 md:p-4 mb-2 md:mb-3 border border-gray-700">
+                              <div><div className="font-bold text-sm md:text-base lg:text-lg">{w.name}</div><div className="text-xs md:text-sm lg:text-base text-green-400">+{w.atk} ATK</div></div>
+                              <button onClick={()=>buyItem('weapon', w)} disabled={player.gold < w.cost || player.weapon?.name === w.name} className="pixel-btn bg-blue-700 text-[10px] md:text-xs lg:text-sm px-3 py-2 md:px-4 md:py-3 cursor-pointer">{w.cost}G</button>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3 className="text-base md:text-lg lg:text-xl text-gray-400 mb-2 md:mb-4 font-bold uppercase border-b border-gray-600 pb-2">Armor (DEF)</h3>
+                          {SHOP_ITEMS.armors.map(a => (
+                            <div key={a.name} className="flex justify-between items-center bg-black p-3 md:p-4 mb-2 md:mb-3 border border-gray-700">
+                              <div><div className="font-bold text-sm md:text-base lg:text-lg">{a.name}</div><div className="text-xs md:text-sm lg:text-base text-blue-400">+{a.def} DEF</div></div>
+                              <button onClick={()=>buyItem('armor', a)} disabled={player.gold < a.cost || player.armor?.name === a.name} className="pixel-btn bg-blue-700 text-[10px] md:text-xs lg:text-sm px-3 py-2 md:px-4 md:py-3 cursor-pointer">{a.cost}G</button>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3 className="text-base md:text-lg lg:text-xl text-gray-400 mb-2 md:mb-4 font-bold uppercase border-b border-gray-600 pb-2">Necklaces (Regen)</h3>
+                          {SHOP_ITEMS.necklaces.map(n => (
+                            <div key={n.name} className="flex justify-between items-center bg-black p-3 md:p-4 mb-2 md:mb-3 border border-gray-700">
+                              <div><div className="font-bold text-sm md:text-base lg:text-lg">{n.name}</div><div className="text-xs md:text-sm lg:text-base text-pink-400">+{n.regen} HP/turn</div></div>
+                              <button onClick={()=>buyItem('necklace', n)} disabled={player.gold < n.cost || player.necklace?.name === n.name} className="pixel-btn bg-blue-700 text-[10px] md:text-xs lg:text-sm px-3 py-2 md:px-4 md:py-3 cursor-pointer">{n.cost}G</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <button onClick={() => setGameState('TOWN')} className="pixel-btn bg-gray-600 mt-6 md:mt-8 text-xs md:text-base lg:text-lg w-full max-w-[250px] mx-auto py-3 md:py-4 cursor-pointer">Back</button>
+                    </div>
+                  )}
+
+                  {gameState === 'MYSTICAL_SHOP' && (
+                    <div className="w-full p-4 md:p-8 h-full flex flex-col animate-in fade-in bg-purple-950/40">
+                      <div className="text-center text-5xl md:text-7xl lg:text-8xl mb-2 md:mb-4"><SparklesIcon className="inline text-fuchsia-400 animate-pulse" size={64}/></div>
+                      <h2 className="text-xl md:text-3xl lg:text-4xl text-fuchsia-400 mb-4 md:mb-6 pixel-font text-center">Mystical Shop</h2>
+                      <p className="text-xs md:text-sm lg:text-base text-gray-400 text-center mb-6 md:mb-10">"Defeat many beasts. Bring me their gold. Only then can you slay the King."</p>
+                      <div className="flex-1 overflow-y-auto space-y-6 md:space-y-8 pr-2 md:pr-4 custom-scroll">
+                        <div>
+                          <h3 className="text-base md:text-lg lg:text-xl text-yellow-300 mb-2 md:mb-4 font-bold uppercase border-b border-fuchsia-800 pb-2">Key Items</h3>
+                          {MYSTICAL_ITEMS.keyItems.map(k => (
+                            <div key={k.name} className="flex justify-between items-center bg-black p-3 md:p-4 mb-2 md:mb-3 border border-fuchsia-900 shadow-[0_0_10px_rgba(162,28,175,0.3)]">
+                              <div><div className="font-bold text-sm md:text-base lg:text-lg text-blue-300">{k.name}</div><div className="text-[10px] md:text-xs lg:text-sm text-gray-400">{k.desc}</div></div>
+                              <button onClick={()=>buyItem('keyItem', k)} disabled={player.gold < k.cost || player.hasBoat} className="pixel-btn bg-fuchsia-800 text-[10px] md:text-xs lg:text-sm px-3 py-2 md:px-4 md:py-3 cursor-pointer">{player.hasBoat ? 'SOLD' : `${k.cost}G`}</button>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3 className="text-base md:text-lg lg:text-xl text-yellow-300 mb-2 md:mb-4 font-bold uppercase border-b border-fuchsia-800 pb-2">Legendary Weapons</h3>
+                          {MYSTICAL_ITEMS.weapons.map(w => (
+                            <div key={w.name} className="flex justify-between items-center bg-black p-3 md:p-4 mb-2 md:mb-3 border border-fuchsia-900 shadow-[0_0_10px_rgba(162,28,175,0.3)]">
+                              <div><div className="font-bold text-sm md:text-base lg:text-lg text-fuchsia-300">{w.name}</div><div className="text-xs md:text-sm lg:text-base text-green-400">+{w.atk} ATK</div></div>
+                              <button onClick={()=>buyItem('weapon', w)} disabled={player.gold < w.cost || player.weapon?.name === w.name} className="pixel-btn bg-fuchsia-800 text-[10px] md:text-xs lg:text-sm px-3 py-2 md:px-4 md:py-3 cursor-pointer">{w.cost}G</button>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3 className="text-base md:text-lg lg:text-xl text-yellow-300 mb-2 md:mb-4 font-bold uppercase border-b border-fuchsia-800 pb-2">Legendary Armor & Items</h3>
+                          {MYSTICAL_ITEMS.armors.map(a => (
+                            <div key={a.name} className="flex justify-between items-center bg-black p-3 md:p-4 mb-2 md:mb-3 border border-fuchsia-900 shadow-[0_0_10px_rgba(162,28,175,0.3)]">
+                              <div><div className="font-bold text-sm md:text-base lg:text-lg text-blue-300">{a.name}</div><div className="text-xs md:text-sm lg:text-base text-blue-400">+{a.def} DEF</div></div>
+                              <button onClick={()=>buyItem('armor', a)} disabled={player.gold < a.cost || player.armor?.name === a.name} className="pixel-btn bg-fuchsia-800 text-[10px] md:text-xs lg:text-sm px-3 py-2 md:px-4 md:py-3 cursor-pointer">{a.cost}G</button>
+                            </div>
+                          ))}
+                          {MYSTICAL_ITEMS.consumables.map(c => (
+                            <div key={c.name} className="flex justify-between items-center bg-black p-3 md:p-4 mb-2 md:mb-3 border border-fuchsia-900 shadow-[0_0_10px_rgba(162,28,175,0.3)]">
+                              <div><div className="font-bold text-sm md:text-base lg:text-lg text-green-300">{c.name}</div><div className="text-[10px] md:text-xs lg:text-sm text-gray-400">Full Heal + Potion</div></div>
+                              <button onClick={()=>buyItem('consumable', c)} disabled={player.gold < c.cost} className="pixel-btn bg-fuchsia-800 text-[10px] md:text-xs lg:text-sm px-3 py-2 md:px-4 md:py-3 cursor-pointer">{c.cost}G</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <button onClick={() => setGameState('EXPLORE')} className="pixel-btn bg-gray-600 mt-6 md:mt-8 text-xs md:text-base lg:text-lg w-full max-w-[250px] mx-auto py-3 md:py-4 cursor-pointer">Leave</button>
+                    </div>
+                  )}
+
+              {/* MONSTER CATCHING COMBAT INTERFACE */}
+              {gameState === 'COMBAT' && currentEnemy && (
+                <div className="w-full h-full flex flex-col bg-gradient-to-b from-blue-900 to-gray-900 relative border-4 border-black font-sans shadow-inner">
+                  
+                  <div className="bg-blue-700 text-white p-3 flex justify-between items-center border-b-4 border-black shadow-md z-10">
+                    <div>
+                        <h2 className="text-lg md:text-xl lg:text-2xl font-black italic text-yellow-300">{player.name}</h2>
+                        <p className="text-xs md:text-sm font-bold text-blue-200">Lv {player.level} | Class: {player.charClass}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm md:text-base font-black text-red-300">HP: {player.hp}/{player.maxHp}</p>
+                        <div className="w-32 md:w-48 lg:w-56 h-3 md:h-4 bg-gray-800 border-2 border-black rounded-full overflow-hidden inline-block shadow-inner mt-1">
+                          <div className="h-full bg-green-500 transition-all duration-300" style={{width: `${(player.hp/player.maxHp)*100}%`}} />
+                        </div>
+                        <p className="text-xs md:text-sm text-blue-200 font-bold mt-1">XP: {player.exp}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 relative p-4 flex flex-col justify-center items-center overflow-hidden">
+                     <div className="absolute top-4 left-4 bg-white border-4 border-black p-2 md:p-3 rounded shadow-[4px_4px_0_rgba(0,0,0,0.5)] min-w-[160px] md:min-w-[200px] z-10 animate-in slide-in-from-left">
+                        <h3 className={`font-black text-sm md:text-lg uppercase ${getDifficultyColor(currentEnemy, player)}`}>Wild {currentEnemy.name}</h3>
+                        <div className="w-full h-3 md:h-4 bg-gray-300 border-2 border-black rounded-full mt-2 overflow-hidden shadow-inner">
+                           <div className="h-full bg-red-500 transition-all duration-300" style={{width: `${(currentEnemy.hp/currentEnemy.maxHp)*100}%`}} />
+                        </div>
+                     </div>
+
+                     <div className={`relative text-[6rem] md:text-[10rem] lg:text-[14rem] drop-shadow-[0_20px_20px_rgba(0,0,0,0.4)] ${screenVfx==='shake-enemy' && !currentEnemy.isDead ?'animate-shake':''} ${currentEnemy.isDead ? 'vfx-death' : ''}`}>
+                        {currentEnemy.icon}
+                        {overlayVfx === 'attack' && <div className="absolute inset-0 flex items-center justify-center vfx-pop z-50 text-5xl md:text-9xl drop-shadow-md">💥</div>}
+                        {overlayVfx === 'ultimate' && <div className="absolute inset-0 flex items-center justify-center vfx-ult z-50 text-7xl md:text-9xl drop-shadow-lg">🌀🔥</div>}
+                     </div>
+
+                     <div className="absolute bottom-4 right-4 bg-white border-4 border-black p-2 md:p-3 rounded shadow-[4px_4px_0_rgba(0,0,0,0.5)] min-w-[160px] md:min-w-[200px] text-right z-10 animate-in slide-in-from-right">
+                        <h3 className="font-black text-black text-sm md:text-lg uppercase">{player.name}</h3>
+                        <p className="text-xs md:text-sm font-bold text-gray-700 mt-1">HP: {player.hp}/{player.maxHp}</p>
+                     </div>
+                  </div>
+
+                  <div className="bg-white border-t-8 border-black p-4 md:p-6 min-h-[140px] md:min-h-[180px] shadow-[inset_0_8px_0_rgba(0,0,0,0.1)] relative z-20">
+                     {!showQuiz ? (
+                        <div className="h-full flex flex-col justify-center">
+                           {isActionLocked ? (
+                              <p className="text-black font-black text-lg md:text-xl lg:text-2xl leading-loose text-center">
+                                 A wild {currentEnemy.name} appeared! ...
+                              </p>
+                           ) : (
+                              <div className="grid grid-cols-2 gap-3 md:gap-4 w-full max-w-lg mx-auto">
+                                 <button onClick={() => { setQuizType('ATTACK'); triggerScienceChallenge(); }} className="bg-red-600 hover:bg-red-500 border-4 border-black text-white font-black uppercase text-sm md:text-lg py-3 md:py-4 shadow-[4px_4px_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 transition-all cursor-pointer">{CLASSES[player.charClass].basicAttackName}</button>
+                                 <button onClick={() => { setQuizType('ULTIMATE_1'); setUltAnswers([]); triggerScienceChallenge(); }} disabled={player.ultCooldown > 0} className="bg-purple-700 hover:bg-purple-600 border-4 border-black text-white font-black uppercase text-sm md:text-lg py-3 md:py-4 flex items-center justify-center gap-2 shadow-[4px_4px_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 transition-all disabled:opacity-50 disabled:active:translate-y-0 disabled:active:shadow-[4px_4px_0_rgba(0,0,0,1)] cursor-pointer">
+                                    <ZapIcon size={20}/> {player.ultCooldown > 0 ? `CD: ${player.ultCooldown}` : 'ULTIMATE'}
+                                 </button>
+                                 <button onClick={()=>executeCombatAction('POTION')} disabled={player.potions<=0} className="bg-pink-500 hover:bg-pink-400 border-4 border-black text-white font-black uppercase text-sm md:text-lg py-3 md:py-4 shadow-[4px_4px_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 transition-all disabled:opacity-50 disabled:active:translate-y-0 disabled:active:shadow-[4px_4px_0_rgba(0,0,0,1)] cursor-pointer">POTION ({player.potions})</button>
+                                 <button onClick={()=>executeCombatAction('FLEE')} disabled={currentEnemy.isBoss} className="bg-gray-600 hover:bg-gray-500 border-4 border-black text-white font-black uppercase text-sm md:text-lg py-3 md:py-4 shadow-[4px_4px_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 transition-all disabled:opacity-50 disabled:active:translate-y-0 disabled:active:shadow-[4px_4px_0_rgba(0,0,0,1)] cursor-pointer">FLEE</button>
+                              </div>
+                           )}
+                        </div>
+                     ) : (
+                         <div className="w-full flex flex-col items-center justify-center">
+                            <div className="text-xs md:text-sm lg:text-base font-mono font-bold text-white mb-4 md:mb-6 bg-black/80 px-4 py-4 md:px-6 md:py-6 border-2 border-white text-left w-full max-w-full shadow-inner rounded leading-relaxed whitespace-pre-wrap overflow-x-auto">
+                              {quizProblem.q}
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 w-full max-w-3xl">
+                               {quizProblem.options.map(opt => (
+                                  <button key={opt} onClick={() => handleQuizAnswer(opt)} className="bg-blue-100 hover:bg-blue-200 text-black border-4 border-blue-900 font-bold text-sm md:text-base lg:text-lg py-3 px-4 shadow-[2px_2px_0_rgba(30,58,138,1)] active:shadow-none active:translate-y-1 transition-all text-left cursor-pointer">
+                                    {opt}
+                                  </button>
+                               ))}
+                            </div>
+                         </div>
+                     )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Controls, Mini-Map & Stats */}
+            <div className="w-full lg:w-[450px] xl:w-[500px] flex flex-col gap-3 md:gap-4 h-full">
+              
+              {/* 1. MENU CONTROLS */}
+              {['EXPLORE', 'TOWN', 'SHOP', 'MYSTICAL_SHOP', 'LOOT'].includes(gameState) && (
+                <div className="flex gap-2 w-full flex-shrink-0">
+                  <button onClick={() => setActiveMenu('INVENTORY')} className="pixel-font flex-1 bg-purple-700 hover:bg-purple-600 text-white border-2 border-white py-2 md:py-3 text-[10px] md:text-xs shadow-[2px_2px_0_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none cursor-pointer">🎒 MENU</button>
+                  <button onClick={saveGame} className="pixel-font flex-1 bg-blue-700 hover:bg-blue-600 text-white border-2 border-white py-2 md:py-3 text-[10px] md:text-xs shadow-[2px_2px_0_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none cursor-pointer">💾 SAVE</button>
+                  <div className="pixel-font flex-1 bg-black text-yellow-400 border-2 border-gray-600 py-2 md:py-3 text-[10px] md:text-xs flex items-center justify-center shadow-[2px_2px_0_rgba(0,0,0,1)]">
+                    ⏱️ {(() => {
+                      const playTimeSeconds = Math.floor((Date.now() - (player.startTime || Date.now())) / 1000);
+                      const mins = Math.floor(playTimeSeconds / 60);
+                      const secs = playTimeSeconds % 60;
+                      return `${mins}m ${secs}s`;
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Player Stats Panel */}
+              {gameState !== 'COMBAT' && (
+                <div className={`bg-blue-950 text-white p-3 md:p-5 pixel-panel flex-shrink-0 transition-shadow ${screenVfx==='flash-green'?'flash-green-panel':''}`}>
+                  <div className="flex justify-between items-end border-b-2 border-blue-800 pb-2 mb-3 md:mb-4">
+                    <h3 className="text-sm md:text-lg lg:text-xl font-bold pixel-font text-yellow-300 uppercase truncate">{player.name}</h3>
+                    <span className="text-[10px] md:text-xs lg:text-sm uppercase pixel-font tracking-tighter shrink-0">LV {player.level}</span>
+                  </div>
+                  
+                  <div className="mb-1 md:mb-2 text-[10px] md:text-sm lg:text-base font-sans font-bold flex justify-between"><span>HP</span> <span>{player.hp}/{player.maxHp}</span></div>
+                  <div className="w-full bg-black h-3 md:h-4 border border-white/20 mb-3 md:mb-4"><div className="bg-red-500 h-full transition-all" style={{width: `${(player.hp/player.maxHp)*100}%`}}></div></div>
+                  
+                  <div className="mb-1 md:mb-2 text-[10px] md:text-sm lg:text-base font-sans font-bold flex justify-between"><span>EXP</span> <span>{player.exp}/{EXP_REQUIREMENTS[player.level] || (player.level*1000)}</span></div>
+                  <div className="w-full bg-black h-3 md:h-4 border border-white/20 mb-4 md:mb-6"><div className="bg-blue-400 h-full transition-all" style={{width: `${(player.exp/(EXP_REQUIREMENTS[player.level] || (player.level*1000)))*100}%`}}></div></div>
+
+                  <div className="grid grid-cols-2 gap-2 md:gap-3 text-xs md:text-sm lg:text-base bg-black/40 p-3 md:p-4 border border-black font-sans font-bold mb-3 md:mb-4">
+                    <div className="flex items-center gap-1 md:gap-2"><SwordIcon size={16} className="text-gray-400"/> {player.atk} {player.weapon && <span className="text-green-400">(+{player.weapon.atk})</span>}</div>
+                    <div className="flex items-center gap-1 md:gap-2"><ShieldIcon size={16} className="text-gray-400"/> {player.def} {player.armor && <span className="text-blue-400">(+{player.armor.def})</span>}</div>
+                    <div className="flex items-center gap-1 md:gap-2"><FlaskConicalIcon size={16} className="text-pink-400"/> {player.potions}</div>
+                    <div className="flex items-center gap-1 md:gap-2 text-yellow-400 border-l border-white/20 pl-2">💰 {player.gold}</div>
+                  </div>
+
+                  <div className="text-[10px] md:text-xs lg:text-sm uppercase font-bold text-gray-400 space-y-1 md:space-y-2 truncate">
+                    <div>WEAPON: <span className={player.weapon && player.weapon.atk > 65 ? "text-fuchsia-400" : "text-white"}>{player.weapon ? player.weapon.name : 'NONE'}</span></div>
+                    <div>ARMOR: <span className={player.armor && player.armor.def > 50 ? "text-blue-400" : "text-white"}>{player.armor ? player.armor.name : 'NONE'}</span></div>
+                    <div>NECK: <span className={player.necklace && player.necklace.hasRevive ? "text-yellow-400" : "text-white"}>{player.necklace ? `${player.necklace.name} (+${player.necklace.regen}/t)` : 'NONE'}</span></div>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Combat Log */}
+              <div className="bg-black border-4 border-gray-600 p-3 md:p-4 h-[120px] md:h-[180px] lg:h-[220px] overflow-y-auto font-sans text-sm md:text-base lg:text-lg flex-shrink-0 rounded flex flex-col shadow-inner custom-scroll">
+                {logs.length === 0 ? <p className="text-gray-600 mt-auto italic text-center w-full">Game events log...</p> : 
+                  logs.map(log => <p key={log.id} className={`mb-1 md:mb-2 ${log.color} break-words`}>{log.message}</p>)
+                }
+                <div ref={logEndRef} />
+              </div>
+
+              {/* 4. D-Pad & Mini-Map Container */}
+              <div className={`mt-auto transition-opacity duration-300 pb-2 flex flex-row items-center justify-between gap-4 md:gap-8 ${['EXPLORE', 'LOOT'].includes(gameState) ? 'opacity-100' : 'opacity-20 pointer-events-none'}`}>
+                
+                {/* Mini Map */}
+                <div className="flex flex-col items-center">
+                  <span className="text-[8px] md:text-[10px] lg:text-xs text-gray-400 mb-1 md:mb-2 tracking-widest font-bold">RADAR</span>
+                  {renderMiniMap()}
+                </div>
+
+                {/* D-Pad */}
+                <div className="grid grid-cols-3 gap-1 md:gap-2 w-28 md:w-48 lg:w-56">
+                  <div/>
+                  <button onPointerDown={(e)=>{e.preventDefault(); move(0,-1);}} className="bg-gray-300 border-b-4 md:border-b-8 border-gray-500 active:border-b-0 active:translate-y-1 md:active:translate-y-2 rounded-t-xl h-10 md:h-16 flex justify-center items-center text-black shadow-lg cursor-pointer"><ArrowUpIcon className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10"/></button>
+                  <div/>
+                  <button onPointerDown={(e)=>{e.preventDefault(); move(-1,0);}} className="bg-gray-300 border-b-4 md:border-b-8 border-gray-500 active:border-b-0 active:translate-y-1 md:active:translate-y-2 rounded-l-xl h-10 md:h-16 flex justify-center items-center text-black shadow-lg cursor-pointer"><ArrowLeftIcon className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10"/></button>
+                  <div className="bg-gray-400 shadow-inner flex items-center justify-center rounded"><div className="w-2 h-2 md:w-4 md:h-4 rounded-full bg-gray-500"></div></div>
+                  <button onPointerDown={(e)=>{e.preventDefault(); move(1,0);}} className="bg-gray-300 border-b-4 md:border-b-8 border-gray-500 active:border-b-0 active:translate-y-1 md:active:translate-y-2 rounded-r-xl h-10 md:h-16 flex justify-center items-center text-black shadow-lg cursor-pointer"><ArrowRightIcon className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10"/></button>
+                  <div/>
+                  <button onPointerDown={(e)=>{e.preventDefault(); move(0,1);}} className="bg-gray-300 border-b-4 md:border-b-8 border-gray-500 active:border-b-0 active:translate-y-1 md:active:translate-y-2 rounded-b-xl h-10 md:h-16 flex justify-center items-center text-black shadow-lg cursor-pointer"><ArrowDownIcon className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10"/></button>
+                  <div/>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+      </div> 
+    </div>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<ErrorBoundary><App /></ErrorBoundary>);
+  </script>
+</body>
+</html>
