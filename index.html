@@ -173,7 +173,7 @@
     // --- AUDIO SYSTEM ---
     let audioCtx = null;
     let bgmInterval = null;
-    let globalIsMuted = false; 
+    let globalIsMuted = false;
 
     const getAudioCtx = () => {
       try {
@@ -217,8 +217,7 @@
     };
     const stopMusic = () => { if (bgmInterval) clearInterval(bgmInterval); };
 
-    // --- EXPANDED QUESTION BANKS (Maximized for robust testing & strict MOE Syllabus adherence) ---
-    // Repetition logic strictly uses Array.pop() from shuffled pool, only repopulating when absolutely empty.
+    // --- DEEPLY EXPANDED QUESTION BANKS (Verified MOE Topics & Focus on Data/Graphs/Definitions) ---
     const QUESTION_BANKS = {
       P3: {
         "Diversity (Living/Non-Living & Materials)": [
@@ -236,7 +235,7 @@
           { q: "Which material is best suited for making a magnet?", options: ["Iron", "Wood", "Glass", "Rubber"], correct: "Iron" }
         ],
         "Systems (Plant & Human)": [
-          { q: "Which body system transports digested food, water, and oxygen around the body?", options: ["Circulatory System", "Digestive System", "Respiratory System", "Skeletal System"], correct: "Circulatory System" },
+          { q: "Which body system transports blood around the human body?", options: ["Circulatory System", "Digestive System", "Respiratory System", "Skeletal System"], correct: "Circulatory System" },
           { q: "Which plant part holds the plant firmly to the ground and absorbs water?", options: ["Roots", "Stem", "Leaves", "Flowers"], correct: "Roots" },
           { q: "Which body system gives the human body its shape and protects vital organs?", options: ["Skeletal System", "Muscular System", "Digestive System", "Respiratory System"], correct: "Skeletal System" },
           { q: "Which part of the plant makes food in the presence of sunlight?", options: ["Leaves", "Roots", "Stem", "Flowers"], correct: "Leaves" },
@@ -376,6 +375,7 @@
       }
     };
 
+    const MAP_SIZE = 35; 
     const CLASSES = {
       Warrior: { hp: 160, atk: 25, def: 20, hpGrow: 40, atkGrow: 12, defGrow: 8, basicAttackName: 'Sword Dance', ultName: 'Omnislash', color: '#1d4ed8' }, 
       Mage: { hp: 100, atk: 40, def: 10, hpGrow: 20, atkGrow: 18, defGrow: 4, basicAttackName: 'Cast', ultName: 'Meteor Strike', color: '#7e22ce' }, 
@@ -514,12 +514,14 @@
       
       const availableGrades = ['P3', 'P4', 'P5', 'P6'];
       const [selectedGrade, setSelectedGrade] = useState('P6');
+      const [selectedGender, setSelectedGender] = useState('Male');
+      const [selectedClass, setSelectedClass] = useState('Warrior');
       const [selectedTopics, setSelectedTopics] = useState(
         Object.keys(QUESTION_BANKS['P6']).map(t => `P6|${t}`)
       );
 
       const [player, setPlayer] = useState({
-        name: 'HERO', charClass: 'Warrior', level: 1, exp: 0, gold: 50, potions: 3, 
+        name: 'HERO', charClass: 'Warrior', gender: 'Male', level: 1, exp: 0, gold: 50, potions: 3, 
         hp: 160, maxHp: 160, atk: 25, def: 20, weapon: null, armor: null, necklace: null, ultCooldown: 0, hasBoat: false, hasRevivedThisBattle: false, selectedTopics: [],
         inventory: [], startTime: Date.now(), answers: []
       });
@@ -534,7 +536,6 @@
       const [quizType, setQuizType] = useState(null); 
       const [ultAnswers, setUltAnswers] = useState([]);
       
-      // Question Bank Ref logic perfectly ensures non-repetition until empty
       const unaskedQuestions = useRef([]); 
 
       const [screenVfx, setScreenVfx] = useState(null); 
@@ -544,7 +545,6 @@
       const [tick, setTick] = useState(0);
 
       const logEndRef = useRef(null);
-
       const [hasSave, setHasSave] = useState(false);
       const [confirmReset, setConfirmReset] = useState(false);
       const [isAudioMuted, setIsAudioMuted] = useState(false);
@@ -604,7 +604,6 @@
       };
 
       const getNextScienceQuestion = () => {
-        // This precise block ensures that questions NEVER repeat until the selected pool is 100% exhausted.
         if (unaskedQuestions.current.length === 0) {
           let questionsPool = [];
           player.selectedTopics.forEach(tId => {
@@ -630,11 +629,10 @@
         if (selectedTopics.length === 0) return; 
         
         const formData = new FormData(e.target);
-        const charClass = formData.get('charClass') || 'Warrior'; 
-        const base = CLASSES[charClass];
+        const base = CLASSES[selectedClass];
         
         setPlayer({
-          name: (formData.get('name') || 'Hero').toUpperCase(), charClass, selectedTopics: selectedTopics,
+          name: (formData.get('name') || 'Hero').toUpperCase(), charClass: selectedClass, gender: selectedGender, selectedTopics: selectedTopics,
           level: 1, exp: 0, gold: 50, potions: 3, hp: base.hp, maxHp: base.hp, atk: base.atk, def: base.def,
           weapon: null, armor: null, necklace: null, ultCooldown: 0, hasBoat: false, hasRevivedThisBattle: false, inventory: [],
           startTime: Date.now(), answers: []
@@ -1302,6 +1300,20 @@
                    </div>
                 </div>
 
+                <label className="pixel-font text-gray-300 mt-2" style={{ fontSize:'12px' }}>Gender</label>
+                <div style={{ display:'flex', gap:'16px', marginBottom:'8px' }}>
+                  <div onClick={() => setSelectedGender('Male')} className="pixel-btn text-center" style={{ flex:1, cursor:'pointer', backgroundColor: selectedGender === 'Male' ? '#3b82f6' : 'black', color:'white', padding:'12px', border: selectedGender === 'Male' ? '4px solid white' : '4px solid #475569' }}>Male</div>
+                  <div onClick={() => setSelectedGender('Female')} className="pixel-btn text-center" style={{ flex:1, cursor:'pointer', backgroundColor: selectedGender === 'Female' ? '#3b82f6' : 'black', color:'white', padding:'12px', border: selectedGender === 'Female' ? '4px solid white' : '4px solid #475569' }}>Female</div>
+                </div>
+                
+                <label className="pixel-font text-gray-300 mt-2" style={{ fontSize:'12px' }}>Class</label>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'16px' }}>
+                  {Object.keys(CLASSES).map((cls) => (
+                    <div key={cls} onClick={() => setSelectedClass(cls)} className="pixel-btn text-center" style={{ cursor:'pointer', backgroundColor: selectedClass === cls ? '#334155' : 'black', borderColor: selectedClass === cls ? '#facc15' : '#000', color:'white', padding:'12px', borderWidth: '4px', borderStyle: 'solid' }}>
+                      {cls} <br/><span style={{ fontSize:'10px', color:'#9ca3af', marginTop:'4px', display:'block' }}>Ult: {CLASSES[cls].ultName}</span>
+                    </div>
+                  ))}
+                </div>
                 <button type="submit" disabled={selectedTopics.length === 0} className="pixel-btn w-full disabled:bg-gray-700 disabled:text-gray-400" style={{ backgroundColor:'#dc2626', color:'white', padding:'16px', fontSize:'1.2rem', marginTop:'8px', cursor:'pointer' }}>
                   {selectedTopics.length === 0 ? "SELECT A TOPIC" : "ENTER WORLD"}
                 </button>
