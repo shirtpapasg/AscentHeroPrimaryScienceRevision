@@ -106,17 +106,22 @@
     @keyframes faintFlash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2) contrast(1.2); } }
     .vfx-faint-flash { animation: faintFlash 0.3s ease-out; }
 
-    /* --- Professional 16-Bit JRPG Terrain Textures --- */
+    /* --- PROFESSIONAL JRPG TERRAIN MAP GRAPHICS --- */
     .terrain-grass { background-color: #4da638; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%234da638'/%3E%3Ccircle cx='4' cy='4' r='1' fill='%2342962e'/%3E%3Ccircle cx='12' cy='10' r='1' fill='%2342962e'/%3E%3C/svg%3E"); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
-    .terrain-forest { background-color: #176b17; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23176b17'/%3E%3Ccircle cx='8' cy='8' r='7' fill='%23105910'/%3E%3Ccircle cx='8' cy='7' r='6' fill='%231a7a1a'/%3E%3Ccircle cx='4' cy='12' r='4' fill='%23126612'/%3E%3Ccircle cx='12' cy='12' r='4' fill='%23126612'/%3E%3C/svg%3E"); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
-    .terrain-mountain { background-color: #4da638; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%234da638'/%3E%3Cpolygon points='8,0 16,16 0,16' fill='%23a06f38'/%3E%3Cpolygon points='8,0 16,16 8,16' fill='%23784d1e'/%3E%3C/svg%3E"); }
-    .terrain-water { background-color: #2b5bc2; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%232b5bc2'/%3E%3Cpath d='M0,8 Q4,4 8,8 T16,8' fill='none' stroke='%234b7ae6' stroke-width='1'/%3E%3Cpath d='M0,12 Q4,8 8,12 T16,12' fill='none' stroke='%231c449c' stroke-width='1'/%3E%3C/svg%3E"); animation: wave-flow 4s linear infinite; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+    
+    .terrain-forest { background-color: #1b7821; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%231b7821'/%3E%3Ccircle cx='4' cy='4' r='5' fill='%23115e16'/%3E%3Ccircle cx='4' cy='3' r='4' fill='%23249b2b'/%3E%3Ccircle cx='12' cy='12' r='5' fill='%23115e16'/%3E%3Ccircle cx='12' cy='11' r='4' fill='%23249b2b'/%3E%3Ccircle cx='8' cy='8' r='6' fill='%230d4711'/%3E%3Ccircle cx='8' cy='7' r='5' fill='%231b7821'/%3E%3C/svg%3E"); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15); }
+    
+    .terrain-mountain { background-color: #4da638; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%234da638'/%3E%3Cpolygon points='8,1 15,15 1,15' fill='%238c5e30'/%3E%3Cpolygon points='8,1 8,15 1,15' fill='%23ab7a46'/%3E%3Cpolygon points='8,1 15,15 8,15' fill='%2366421f'/%3E%3Cpolygon points='4,8 8,15 0,15' fill='%23523417'/%3E%3Cpolygon points='4,8 4,15 0,15' fill='%236e4823'/%3E%3C/svg%3E"); }
+    
+    .terrain-water { background-color: #2b5bc2; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%232b5bc2'/%3E%3Cpath d='M0,4 Q4,0 8,4 T16,4' fill='none' stroke='%234a7cf6' stroke-width='1.5'/%3E%3Cpath d='M0,12 Q4,8 8,12 T16,12' fill='none' stroke='%231e469c' stroke-width='1.5'/%3E%3C/svg%3E"); animation: wave-flow 3s linear infinite; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+    
     @keyframes wave-flow { 0% { background-position: 0 0; } 100% { background-position: 0 16px; } }
     
     .terrain-path { background-color: #d1a569; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
-    .terrain-demon { background-color: #4a1010; }
-    .terrain-lava { background-color: #ef4444; }
-    .terrain-cave { background-color: #1f2937; }
+    .terrain-demon { background-color: #3b0c0c; background-image: radial-gradient(#260707 30%, transparent 30%); background-size: 8px 8px; }
+    .terrain-lava { background-color: #cc1b1b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 4 Q 4 0 8 4 T 16 4' stroke='%23ff7b00' fill='none' stroke-width='2'/%3E%3Cpath d='M0 12 Q 4 8 8 12 T 16 12' stroke='%23940c0c' fill='none' stroke-width='2'/%3E%3C/svg%3E"); animation: lava-pulse 2s infinite alternate; }
+    @keyframes lava-pulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.3); } }
+    .terrain-cave { background-color: #2a2a2a; background-image: radial-gradient(#111 20%, transparent 21%); background-size: 8px 8px; }
 
     #sls-loader { position: fixed; inset: 0; background-color: #050b14; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fbbf24; font-family: 'Press Start 2P', monospace; z-index: 9999; }
     @keyframes fast-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
@@ -168,7 +173,7 @@
     // --- AUDIO SYSTEM ---
     let audioCtx = null;
     let bgmInterval = null;
-    let globalIsMuted = false;
+    let globalIsMuted = false; 
 
     const getAudioCtx = () => {
       try {
@@ -212,105 +217,165 @@
     };
     const stopMusic = () => { if (bgmInterval) clearInterval(bgmInterval); };
 
-    // --- DEEPLY EXPANDED QUESTION BANKS (Verified MOE Topics & Focus on Data/Graphs/Definitions) ---
+    // --- EXPANDED QUESTION BANKS (Maximized for robust testing & strict MOE Syllabus adherence) ---
+    // Repetition logic strictly uses Array.pop() from shuffled pool, only repopulating when absolutely empty.
     const QUESTION_BANKS = {
       P3: {
         "Diversity (Living/Non-Living & Materials)": [
-          { q: "Which of the following shows that living things respond to changes?", options: ["A millipede rolling up when touched.", "A young plant growing taller.", "A bird laying eggs.", "A tiger eating meat."], correct: "A millipede rolling up when touched." },
-          { q: "What do all living things need to survive?", options: ["Air, food, and water.", "Sunlight, soil, and water.", "Air, shelter, and meat.", "Water, shelter, and soil."], correct: "Air, food, and water." },
-          { q: "How are plants different from animals?", options: ["Plants can make their own food, but animals cannot.", "Plants need air, but animals do not.", "Plants cannot grow, but animals can.", "Plants do not reproduce, but animals do."], correct: "Plants can make their own food, but animals cannot." },
-          { q: "Which animal breathes through gills and has scales?", options: ["Fish", "Amphibian", "Reptile", "Mammal"], correct: "Fish" },
-          { q: "Which animal group has a body covering of hair or fur?", options: ["Mammals", "Birds", "Reptiles", "Amphibians"], correct: "Mammals" },
-          { q: "Which material is waterproof and best for making an umbrella?", options: ["Plastic", "Wood", "Paper", "Cotton"], correct: "Plastic" },
-          { q: "Why is glass used to make window panes?", options: ["It is transparent.", "It is flexible.", "It is magnetic.", "It absorbs water."], correct: "It is transparent." },
-          { q: "Based on a data table, Material X absorbs 0ml of water, Material Y absorbs 20ml. Which is best for a raincoat?", options: ["Material X", "Material Y", "Both", "Neither"], correct: "Material X" }
+          { q: "Definition: Which characteristic applies to ALL living things?", options: ["They need air, food, and water.", "They can make their own food.", "They give birth to live young.", "They have hair or fur."], correct: "They need air, food, and water." },
+          { q: "A fair test was conducted on 4 materials to find the most waterproof. Which variable MUST be kept constant?", options: ["The size and thickness of the materials.", "The type of material used.", "The amount of water absorbed.", "The time of day."], correct: "The size and thickness of the materials." },
+          { q: "Study the table: Material A bends easily. Material B breaks when bent. Material C stretches. Which is the most flexible?", options: ["Material A", "Material B", "Material C", "None"], correct: "Material A" },
+          { q: "How are plants different from fungi (like mushrooms)?", options: ["Plants make their own food, fungi do not.", "Plants reproduce by spores, fungi by seeds.", "Plants cannot grow, fungi can.", "Plants do not need water."], correct: "Plants make their own food, fungi do not." },
+          { q: "Data Interpretation: Animal X has 6 legs, a hard outer covering, and reproduces by laying eggs. What animal group is X?", options: ["Insects", "Mammals", "Birds", "Reptiles"], correct: "Insects" },
+          { q: "Which animal breathes through gills and is covered with scales?", options: ["Fish", "Amphibian", "Reptile", "Mammal"], correct: "Fish" },
+          { q: "Why is ceramic used to make floor tiles in a bathroom?", options: ["It is waterproof and strong.", "It is transparent.", "It is a magnetic material.", "It floats on water."], correct: "It is waterproof and strong." },
+          { q: "A student placed a pot of seeds in a dark cupboard. After a week, they grew into pale, thin plants. What does this show?", options: ["Living things need sunlight to make food.", "Living things respond to changes.", "Living things can grow without water.", "Living things do not need air."], correct: "Living things need sunlight to make food." },
+          { q: "Which group of animals is warm-blooded and suckles its young?", options: ["Mammals", "Birds", "Reptiles", "Fish"], correct: "Mammals" },
+          { q: "If Material Y allows most light to pass through, it is best described as:", options: ["Transparent", "Translucent", "Opaque", "Reflective"], correct: "Transparent" },
+          { q: "Based on a graph showing plant height over 10 days, what characteristic of living things is being observed?", options: ["Living things grow.", "Living things reproduce.", "Living things die.", "Living things breathe."], correct: "Living things grow." },
+          { q: "Which material is best suited for making a magnet?", options: ["Iron", "Wood", "Glass", "Rubber"], correct: "Iron" }
         ],
         "Systems (Plant & Human)": [
-          { q: "Which body system transports blood around the human body?", options: ["Circulatory System", "Digestive System", "Respiratory System", "Skeletal System"], correct: "Circulatory System" },
-          { q: "Which plant part holds the plant firmly to the ground?", options: ["Roots", "Stem", "Leaves", "Flowers"], correct: "Roots" },
-          { q: "Which body system gives the human body its shape?", options: ["Skeletal System", "Muscular System", "Digestive System", "Respiratory System"], correct: "Skeletal System" },
-          { q: "Which part of the plant makes food?", options: ["Leaves", "Roots", "Stem", "Flowers"], correct: "Leaves" },
-          { q: "What is the main function of the human respiratory system?", options: ["To take in oxygen and remove carbon dioxide.", "To digest food.", "To pump blood.", "To support the body."], correct: "To take in oxygen and remove carbon dioxide." }
+          { q: "Which body system transports digested food, water, and oxygen around the body?", options: ["Circulatory System", "Digestive System", "Respiratory System", "Skeletal System"], correct: "Circulatory System" },
+          { q: "Which plant part holds the plant firmly to the ground and absorbs water?", options: ["Roots", "Stem", "Leaves", "Flowers"], correct: "Roots" },
+          { q: "Which body system gives the human body its shape and protects vital organs?", options: ["Skeletal System", "Muscular System", "Digestive System", "Respiratory System"], correct: "Skeletal System" },
+          { q: "Which part of the plant makes food in the presence of sunlight?", options: ["Leaves", "Roots", "Stem", "Flowers"], correct: "Leaves" },
+          { q: "What is the main function of the human respiratory system?", options: ["To take in oxygen and remove carbon dioxide.", "To digest food into simple substances.", "To pump blood to all body parts.", "To support the body."], correct: "To take in oxygen and remove carbon dioxide." },
+          { q: "Data Table: Organ X breaks down food. Organ Y absorbs water. Organ Z absorbs digested food. What is Organ Z?", options: ["Small Intestine", "Large Intestine", "Stomach", "Gullet"], correct: "Small Intestine" },
+          { q: "In an experiment, a celery stalk is placed in red-colored water. After 1 day, the leaves turn red. This proves:", options: ["The stem transports water to the leaves.", "The leaves make red food.", "The roots are no longer working.", "Water evaporates from leaves."], correct: "The stem transports water to the leaves." },
+          { q: "Which two human systems must work together to allow you to bend your arm?", options: ["Skeletal and Muscular", "Digestive and Circulatory", "Respiratory and Skeletal", "Circulatory and Muscular"], correct: "Skeletal and Muscular" },
+          { q: "Where does digestion begin in the human body?", options: ["Mouth", "Stomach", "Gullet", "Small Intestine"], correct: "Mouth" },
+          { q: "A graph tracks breathing rate during a run. Why does breathing rate increase?", options: ["To take in more oxygen for the muscles.", "To digest food faster.", "To cool the body down.", "To pump blood slower."], correct: "To take in more oxygen for the muscles." }
         ],
         "Interactions (Magnets)": [
-          { q: "Which of the following is a magnetic material?", options: ["Steel", "Copper", "Aluminum", "Wood"], correct: "Steel" },
+          { q: "Which of the following materials is magnetic?", options: ["Steel", "Copper", "Aluminum", "Wood"], correct: "Steel" },
           { q: "Where is the magnetic pull of a bar magnet the strongest?", options: ["At its poles", "At its center", "On its sides", "It is equal everywhere"], correct: "At its poles" },
-          { q: "What happens when the North pole of a magnet faces the South pole of another?", options: ["They attract.", "They repel.", "Nothing happens.", "They lose magnetism."], correct: "They attract." },
-          { q: "What happens when the North pole of a magnet faces the North pole of another?", options: ["They repel.", "They attract.", "Nothing happens.", "They explode."], correct: "They repel." }
+          { q: "What happens when the North pole of a magnet faces the South pole of another magnet?", options: ["They attract.", "They repel.", "Nothing happens.", "They lose magnetism."], correct: "They attract." },
+          { q: "What happens when the North pole of a magnet faces the North pole of another magnet?", options: ["They repel.", "They attract.", "Nothing happens.", "They explode."], correct: "They repel." },
+          { q: "How can you make a temporary magnet using an iron nail?", options: ["Stroke it with a magnet in one direction.", "Rub two nails together.", "Hit it with a hammer.", "Heat it over a fire."], correct: "Stroke it with a magnet in one direction." },
+          { q: "Data Interpretation: Magnet A attracts 10 pins. Magnet B attracts 2 pins. Magnet C attracts 15 pins. Which is the strongest?", options: ["Magnet C", "Magnet A", "Magnet B", "They are equal"], correct: "Magnet C" },
+          { q: "A fair test is conducted to find if a magnet works through paper. What is the changed variable?", options: ["The number of paper sheets", "The size of the magnet", "The type of paperclip", "The person doing the test"], correct: "The number of paper sheets" },
+          { q: "A graph shows magnetic strength dropping to zero as the magnet is heated. Conclusion?", options: ["Heating a magnet causes it to lose its magnetism.", "Heat makes magnets stronger.", "Magnets melt easily.", "Fire is a magnetic material."], correct: "Heating a magnet causes it to lose its magnetism." },
+          { q: "To fairly test if a U-shaped magnet is stronger than a Bar magnet, what must be kept constant?", options: ["The distance between the magnet and the iron nails.", "The shape of the magnets.", "The color of the magnets.", "The person holding them."], correct: "The distance between the magnet and the iron nails." },
+          { q: "Definition: 'Repel' in magnetism means to...", options: ["push away from each other.", "pull towards each other.", "stick together permanently.", "lose magnetic force."], correct: "push away from each other." }
         ]
       },
       P4: {
         "Cycles (Matter)": [
-          { q: "Which correctly identifies the stages of a mosquito's life cycle?", options: ["Egg -> Larva -> Pupa -> Adult", "Egg -> Pupa -> Larva -> Adult", "Egg -> Nymph -> Adult -> Pupa", "Egg -> Larva -> Adult"], correct: "Egg -> Larva -> Pupa -> Adult" },
-          { q: "What property of matter does a syringe filled with air prove when compressed?", options: ["Gas can be compressed.", "Gas has a definite shape.", "Gas has a definite mass.", "Gas expands when heated."], correct: "Gas can be compressed." },
+          { q: "Which identifies the correct stages of a mosquito's life cycle?", options: ["Egg -> Larva -> Pupa -> Adult", "Egg -> Pupa -> Larva -> Adult", "Egg -> Nymph -> Adult -> Pupa", "Egg -> Larva -> Adult"], correct: "Egg -> Larva -> Pupa -> Adult" },
+          { q: "What property of matter does a syringe filled with air prove when the plunger is pushed in?", options: ["Gas can be compressed.", "Gas has a definite shape.", "Gas has a definite mass.", "Gas expands when heated."], correct: "Gas can be compressed." },
           { q: "Which state of matter has a definite volume but no definite shape?", options: ["Liquid", "Solid", "Gas", "Plasma"], correct: "Liquid" },
-          { q: "Which animal has a 3-stage life cycle?", options: ["Cockroach", "Butterfly", "Mosquito", "Beetle"], correct: "Cockroach" },
-          { q: "What is the definition of 'Matter'?", options: ["Anything that has mass and occupies space.", "Energy that gives off light.", "A force that pulls objects.", "A material that conducts heat."], correct: "Anything that has mass and occupies space." }
+          { q: "Which animal has a 3-stage life cycle consisting of Egg -> Nymph -> Adult?", options: ["Cockroach", "Butterfly", "Mosquito", "Frog"], correct: "Cockroach" },
+          { q: "Definition: Matter is formally defined as...", options: ["anything that has mass and occupies space.", "energy that gives off light.", "a force that pulls objects.", "a material that conducts heat."], correct: "anything that has mass and occupies space." },
+          { q: "Experiment: A rock is lowered into a measuring cylinder containing 50ml of water. The water level rises to 70ml. What is the rock's volume?", options: ["20ml", "70ml", "50ml", "120ml"], correct: "20ml" },
+          { q: "Data Table: Animal X's life cycle stages: Egg (3 days), Larva (10 days), Pupa (4 days). How many days until it becomes an adult?", options: ["17 days", "13 days", "14 days", "10 days"], correct: "17 days" },
+          { q: "A graph plots the mass of a seed as it germinates. The seed leaves lose mass over 5 days. Why?", options: ["The seed leaves provide food for the growing seedling.", "The seed is dying.", "Water is evaporating from the seed.", "The roots are eating the leaves."], correct: "The seed leaves provide food for the growing seedling." },
+          { q: "To fairly test whether air has mass, what equipment setup is required?", options: ["Two identical balloons on a balance scale.", "A beaker and a measuring cylinder.", "A thermometer and hot water.", "A syringe and a ruler."], correct: "Two identical balloons on a balance scale." },
+          { q: "Which of the following is NOT matter?", options: ["Shadow", "Air", "Water", "Sand"], correct: "Shadow" }
         ],
         "Energy (Light & Heat)": [
-          { q: "Definition: Heat is best described as...", options: ["A form of energy that flows from a hotter to a cooler region.", "A force that pushes objects apart.", "A substance with mass and volume.", "A type of light that plants use."], correct: "A form of energy that flows from a hotter to a cooler region." },
-          { q: "What is the definition of a 'heat conductor'?", options: ["A material that allows heat to pass through it easily.", "A material that blocks heat.", "A material that creates its own heat.", "A material that changes state easily."], correct: "A material that allows heat to pass through it easily." },
-          { q: "What happens to a shadow when the object moves further away from the light source?", options: ["The shadow becomes smaller.", "The shadow becomes larger.", "The shadow disappears.", "The shadow changes shape."], correct: "The shadow becomes smaller." },
-          { q: "Why are cooking pots usually made of metal?", options: ["Metals are good conductors of heat.", "Metals are good insulators of heat.", "Metals are light.", "Metals melt easily."], correct: "Metals are good conductors of heat." },
-          { q: "Definition: What makes a test a 'Fair Test'?", options: ["Changing only one variable and keeping everything else constant.", "Using very expensive equipment.", "Changing all variables at the same time.", "Doing the test only once."], correct: "Changing only one variable and keeping everything else constant." }
+          { q: "Definition: Heat is best described as...", options: ["a form of energy that flows from a hotter to a cooler region.", "a force that pushes objects apart.", "a substance with mass and volume.", "a type of light that plants use."], correct: "a form of energy that flows from a hotter to a cooler region." },
+          { q: "Definition: A 'heat conductor' is a material that...", options: ["allows heat to pass through it easily.", "blocks heat from passing.", "creates its own heat energy.", "changes state when heated."], correct: "allows heat to pass through it easily." },
+          { q: "What happens to a shadow when the object moves closer to the light source?", options: ["The shadow becomes larger.", "The shadow becomes smaller.", "The shadow disappears.", "The shadow changes shape."], correct: "The shadow becomes larger." },
+          { q: "Why are the handles of cooking pots usually made of plastic or wood?", options: ["They are poor conductors of heat (insulators).", "They are good conductors of heat.", "They make the pot lighter.", "They melt easily."], correct: "They are poor conductors of heat (insulators)." },
+          { q: "Definition: A 'Fair Test' is an experiment where...", options: ["only one variable is changed and all others are kept constant.", "the most expensive equipment is used.", "all variables are changed at the same time.", "the test is conducted outdoors."], correct: "only one variable is changed and all others are kept constant." },
+          { q: "A graph plots temperature of water in a black cup vs a white cup under the sun. The black cup's line rises faster. Conclusion?", options: ["Dark colors absorb heat faster than light colors.", "White cups are better conductors.", "Water boils faster in the dark.", "The sun only heats black objects."], correct: "Dark colors absorb heat faster than light colors." },
+          { q: "Experiment: Placing a metal spoon and a plastic spoon in hot soup. What is the dependent (measured) variable?", options: ["The temperature of the spoons after 5 minutes.", "The material of the spoons.", "The initial temperature of the soup.", "The size of the bowls."], correct: "The temperature of the spoons after 5 minutes." },
+          { q: "How does light travel?", options: ["In straight lines.", "In wavy lines.", "In a zig-zag pattern.", "In circles."], correct: "In straight lines." },
+          { q: "A bimetallic strip bends when heated. What scientific principle does this demonstrate?", options: ["Solids expand when they gain heat.", "Metals melt easily.", "Heat travels in straight lines.", "Air occupies space."], correct: "Solids expand when they gain heat." },
+          { q: "If an object allows absolutely no light to pass through it, it is...", options: ["Opaque", "Transparent", "Translucent", "Reflective"], correct: "Opaque" }
         ]
       },
       P5: {
         "Cycles (Water & Reproduction)": [
-          { q: "What is the definition of 'condensation' in the water cycle?", options: ["Water vapour losing heat and changing to liquid water.", "Liquid water gaining heat and changing to water vapour.", "Ice melting into water.", "Water freezing into ice."], correct: "Water vapour losing heat and changing to liquid water." },
+          { q: "Definition: Condensation in the water cycle is the process of...", options: ["water vapour losing heat and changing to liquid water.", "liquid water gaining heat and changing to water vapour.", "ice melting into water.", "water freezing into ice."], correct: "water vapour losing heat and changing to liquid water." },
           { q: "At what temperature does pure water boil?", options: ["100 degrees Celsius", "0 degrees Celsius", "50 degrees Celsius", "212 degrees Celsius"], correct: "100 degrees Celsius" },
-          { q: "What is the transfer of pollen grains from the anther to the stigma called?", options: ["Pollination", "Fertilisation", "Germination", "Dispersal"], correct: "Pollination" },
-          { q: "A graph shows evaporation rate increasing. What variable could have caused this?", options: ["An increase in exposed surface area.", "A decrease in temperature.", "A decrease in wind speed.", "An increase in humidity."], correct: "An increase in exposed surface area." },
-          { q: "Definition: Fertilisation in plants is the...", options: ["fusion of the male and female reproductive cells.", "transfer of pollen by insects.", "dispersal of seeds by wind.", "growth of a seedling's roots."], correct: "fusion of the male and female reproductive cells." }
+          { q: "Definition: Pollination is the transfer of pollen grains from the...", options: ["anther to the stigma.", "stigma to the ovary.", "petal to the sepal.", "roots to the leaves."], correct: "anther to the stigma." },
+          { q: "A graph shows the evaporation rate increasing. Which variable change could cause this?", options: ["An increase in exposed surface area.", "A decrease in surrounding temperature.", "A decrease in wind speed.", "An increase in humidity."], correct: "An increase in exposed surface area." },
+          { q: "Definition: Fertilisation in plants is the...", options: ["fusion of the male and female reproductive cells.", "transfer of pollen by insects.", "dispersal of seeds by wind.", "growth of a seedling's roots."], correct: "fusion of the male and female reproductive cells." },
+          { q: "Experimental setup: Towel A is folded, Towel B is spread out. Both hang in the sun. Why does Towel B dry faster?", options: ["It has a larger exposed surface area.", "It absorbs more heat from the sun.", "It is a better conductor of heat.", "It is made of a different material."], correct: "It has a larger exposed surface area." },
+          { q: "Data Table: Seed P (fleshy, sweet), Seed Q (hooks), Seed R (wing-like). Which is dispersed by wind?", options: ["Seed R", "Seed P", "Seed Q", "None"], correct: "Seed R" },
+          { q: "A graph of water temperature over time shows a flat horizontal line at 0 degrees. What process is occurring?", options: ["Melting or Freezing", "Boiling", "Evaporation", "Condensation"], correct: "Melting or Freezing" },
+          { q: "Which part of the flower develops into a fruit after fertilisation?", options: ["Ovary", "Ovule", "Petal", "Stigma"], correct: "Ovary" },
+          { q: "What happens to liquid water during evaporation?", options: ["It gains heat and turns into water vapour.", "It loses heat and turns into ice.", "It loses heat and turns into a liquid.", "It gains heat and turns into ice."], correct: "It gains heat and turns into water vapour." }
         ],
         "Systems (Cells & Transport)": [
-          { q: "What is the function of the 'nucleus' in a cell?", options: ["It controls all activities within the cell.", "It makes food for the cell.", "It gives the cell a regular shape.", "It allows substances to move in and out."], correct: "It controls all activities within the cell." },
-          { q: "Which part of a plant cell contains chlorophyll to make food?", options: ["Chloroplast", "Nucleus", "Cell Wall", "Cytoplasm"], correct: "Chloroplast" },
+          { q: "Definition: The 'nucleus' of a cell functions to...", options: ["control all activities within the cell.", "make food for the cell using light.", "give the cell a rigid, regular shape.", "allow substances to move in and out."], correct: "control all activities within the cell." },
+          { q: "Which part of a plant cell contains chlorophyll to trap light for making food?", options: ["Chloroplast", "Nucleus", "Cell Wall", "Cytoplasm"], correct: "Chloroplast" },
           { q: "Which cell part is found in plant cells but NOT in animal cells?", options: ["Cell Wall", "Cell Membrane", "Nucleus", "Cytoplasm"], correct: "Cell Wall" },
-          { q: "Which plant tubes transport water from the roots to the leaves?", options: ["Water-carrying tubes", "Food-carrying tubes", "Stomata", "Chloroplasts"], correct: "Water-carrying tubes" },
-          { q: "A plant's stem is cut, removing the outer ring. The part above the cut swells. Why?", options: ["Food-carrying tubes are cut, so food accumulates.", "Water is blocked from going down.", "The plant is growing extra leaves.", "Air cannot enter the stem."], correct: "Food-carrying tubes are cut, so food accumulates." }
+          { q: "Which plant tubes transport water and mineral salts from the roots to the leaves?", options: ["Water-carrying tubes", "Food-carrying tubes", "Stomata", "Chloroplasts"], correct: "Water-carrying tubes" },
+          { q: "A plant's stem is cut, completely removing the outer ring. After a week, the part above the cut swells. Why?", options: ["Food-carrying tubes are cut, so food accumulates.", "Water is blocked from going down.", "The plant is growing extra leaves.", "Air cannot enter the stem."], correct: "Food-carrying tubes are cut, so food accumulates." },
+          { q: "What does the human circulatory system transport?", options: ["Digested food, water, oxygen, and waste materials.", "Only oxygen and carbon dioxide.", "Only waste materials like sweat.", "Undigested food to the stomach."], correct: "Digested food, water, oxygen, and waste materials." },
+          { q: "Definition: A 'cell membrane' is best described as...", options: ["a partially permeable layer that controls movement of substances in and out.", "a rigid layer that gives the cell shape.", "a jelly-like substance where activities occur.", "the part that contains genetic information."], correct: "a partially permeable layer that controls movement of substances in and out." },
+          { q: "Data Table: Cell A has chloroplasts. Cell B does not. Both have a nucleus and cell wall. Where is Cell B likely found?", options: ["In the roots of a plant.", "In the leaves of a plant.", "In a human cheek.", "In an animal muscle."], correct: "In the roots of a plant." },
+          { q: "Which variable is crucial to keep constant when comparing the number of stomata on the top vs bottom of a leaf?", options: ["The species of the plant.", "The size of the microscope.", "The time of day.", "The amount of water given."], correct: "The species of the plant." },
+          { q: "What jelly-like substance fills the cell and is where most cell activities happen?", options: ["Cytoplasm", "Nucleus", "Cell sap", "Chlorophyll"], correct: "Cytoplasm" }
         ],
         "Systems (Electrical)": [
-          { q: "What happens when you add more batteries in a series circuit?", options: ["The bulb becomes brighter.", "The bulb becomes dimmer.", "The current stops.", "The batteries explode."], correct: "The bulb becomes brighter." },
+          { q: "What happens to the brightness of a bulb when you add more batteries in a series circuit?", options: ["The bulb becomes brighter.", "The bulb becomes dimmer.", "The current stops.", "The bulb will not light up."], correct: "The bulb becomes brighter." },
           { q: "Data Interpretation: Circuit A has 2 bulbs in series. Circuit B has 2 bulbs in parallel. If one bulb blows in both circuits, what happens?", options: ["Circuit A goes dark; Circuit B stays lit.", "Both circuits go dark.", "Both circuits stay lit.", "Circuit A stays lit; Circuit B goes dark."], correct: "Circuit A goes dark; Circuit B stays lit." },
-          { q: "What material is considered a good electrical insulator?", options: ["Rubber", "Copper", "Iron", "Gold"], correct: "Rubber" },
-          { q: "A gap in a circuit means...", options: ["The circuit is open and current cannot flow.", "The circuit is closed and current flows.", "The batteries are dead.", "The bulb is blown."], correct: "The circuit is open and current cannot flow." },
-          { q: "Definition: An electrical conductor is a material that...", options: ["allows electric current to flow through it easily.", "blocks all electrical current.", "generates its own electricity.", "stores energy for later."], correct: "allows electric current to flow through it easily." }
+          { q: "Which of the following materials is a good electrical insulator?", options: ["Rubber", "Copper", "Iron", "Saltwater"], correct: "Rubber" },
+          { q: "If there is a gap in an electrical circuit, what is the result?", options: ["The circuit is open and current cannot flow.", "The circuit is closed and current flows.", "The batteries overheat.", "The bulb shines brighter."], correct: "The circuit is open and current cannot flow." },
+          { q: "Definition: An electrical conductor is a material that...", options: ["allows electric current to flow through it easily.", "blocks all electrical current.", "generates its own electricity.", "stores electrical energy."], correct: "allows electric current to flow through it easily." },
+          { q: "Study the table: Material X lights the bulb. Material Y does not. What are X and Y likely to be?", options: ["X: Metal, Y: Plastic", "X: Wood, Y: Metal", "X: Glass, Y: Plastic", "X: Rubber, Y: Wood"], correct: "X: Metal, Y: Plastic" },
+          { q: "A graph plots bulb brightness against the number of batteries added in series. What is the expected trend before the bulb fuses?", options: ["Brightness increases steadily.", "Brightness decreases.", "Brightness stays exactly the same.", "Brightness drops to zero immediately."], correct: "Brightness increases steadily." },
+          { q: "Experiment: Testing conductivity of different wires. What is the dependent (measured) variable?", options: ["Whether the bulb lights up.", "The material of the object.", "The number of batteries used.", "The thickness of the wire."], correct: "Whether the bulb lights up." },
+          { q: "Why are electrical wires commonly wrapped in a plastic coating?", options: ["Plastic is an electrical insulator that prevents shocks.", "Plastic makes the current flow faster.", "Plastic generates heat to keep wires warm.", "Plastic is a strong electrical conductor."], correct: "Plastic is an electrical insulator that prevents shocks." },
+          { q: "What is the primary function of a switch in a circuit?", options: ["To open or close the circuit.", "To provide electrical energy.", "To convert electricity into light.", "To act as a resistor."], correct: "To open or close the circuit." }
         ],
         "Energy (Photosynthesis)": [
           { q: "Definition: Photosynthesis is...", options: ["the process where plants make food using light energy, water, and carbon dioxide.", "how plants absorb water from the soil.", "the process of animals digesting food.", "how plants release oxygen at night."], correct: "the process where plants make food using light energy, water, and carbon dioxide." },
-          { q: "Which gas is taken in by plants during photosynthesis?", options: ["Carbon Dioxide", "Oxygen", "Nitrogen", "Hydrogen"], correct: "Carbon Dioxide" },
-          { q: "A line graph plots 'Rate of Photosynthesis' vs 'Light Intensity'. The line goes up, then becomes flat. Why?", options: ["Another factor, like CO2, is now limiting the rate.", "Too much light kills the plant.", "The plant ran out of oxygen.", "Photosynthesis only happens in the dark."], correct: "Another factor, like CO2, is now limiting the rate." },
-          { q: "What are the products of photosynthesis?", options: ["Sugar and Oxygen", "Water and Carbon Dioxide", "Heat and Light", "Nitrogen and Sugar"], correct: "Sugar and Oxygen" },
-          { q: "Data: A plant 10cm from a lamp makes 15 bubbles/min. At 30cm, it makes 5 bubbles/min. What is the changed variable?", options: ["Light intensity", "Amount of water", "Type of plant", "Temperature"], correct: "Light intensity" }
+          { q: "Which gas is taken in by plants from the air during photosynthesis?", options: ["Carbon Dioxide", "Oxygen", "Nitrogen", "Hydrogen"], correct: "Carbon Dioxide" },
+          { q: "A line graph plots 'Rate of Photosynthesis' vs 'Light Intensity'. The line rises, then becomes flat. Why?", options: ["Another factor, like CO2 concentration, is now limiting the rate.", "Too much light kills the plant.", "The plant ran out of oxygen.", "Photosynthesis only happens in the dark."], correct: "Another factor, like CO2 concentration, is now limiting the rate." },
+          { q: "What are the essential products generated by photosynthesis?", options: ["Sugar and Oxygen", "Water and Carbon Dioxide", "Heat and Light", "Nitrogen and Sugar"], correct: "Sugar and Oxygen" },
+          { q: "Data: A water plant 10cm from a lamp makes 15 bubbles/min. At 30cm, it makes 5 bubbles/min. What is the changed variable?", options: ["Light intensity", "Amount of water", "Type of plant", "Temperature"], correct: "Light intensity" },
+          { q: "Where does a plant ultimately get its energy to perform photosynthesis?", options: ["The Sun", "The Soil", "The Water", "The Air"], correct: "The Sun" },
+          { q: "Experiment: A plant is kept in a dark cupboard for 48 hours before a test. Why is this step necessary?", options: ["To destarch the leaves (remove stored food).", "To make it grow taller quickly.", "To test if it needs water.", "To kill the chloroplasts."], correct: "To destarch the leaves (remove stored food)." },
+          { q: "What is the specific purpose of chlorophyll in a plant cell?", options: ["To trap light energy for photosynthesis.", "To absorb water from the ground.", "To attract insects for pollination.", "To release carbon dioxide."], correct: "To trap light energy for photosynthesis." },
+          { q: "Which parts of a plant generally carry out photosynthesis?", options: ["Leaves and green stems", "Roots and flowers", "Fruits and seeds", "Bark and dead branches"], correct: "Leaves and green stems" },
+          { q: "During a fair test on photosynthesis rate, if you change light intensity, what must remain constant?", options: ["Amount of water and carbon dioxide.", "The number of bubbles produced.", "The rate of growth.", "The time the experiment ends."], correct: "Amount of water and carbon dioxide." }
         ]
       },
       P6: {
         "Interactions (Forces)": [
-          { q: "Definition: A force is best described as...", options: ["A push or a pull acting on an object.", "A type of energy that creates heat.", "The amount of matter in an object.", "The space an object occupies."], correct: "A push or a pull acting on an object." },
+          { q: "Definition: A force is best described scientifically as...", options: ["A push or a pull acting on an object.", "A type of energy that creates heat.", "The amount of matter in an object.", "The space an object occupies."], correct: "A push or a pull acting on an object." },
           { q: "What is the definition of 'frictional force'?", options: ["A force that opposes motion between two surfaces in contact.", "A pull exerted by the Earth.", "A force that pulls magnetic materials.", "A force exerted by a stretched spring."], correct: "A force that opposes motion between two surfaces in contact." },
-          { q: "Which force causes a ball thrown into the air to fall back down?", options: ["Gravitational force", "Frictional force", "Magnetic force", "Elastic spring force"], correct: "Gravitational force" },
-          { q: "Graph Analysis: A straight diagonal line shows spring extension vs weight added. What does this mean?", options: ["Extension increases steadily as weight increases.", "The spring is broken.", "Gravity decreases as weight increases.", "Friction is opposing the pull."], correct: "Extension increases steadily as weight increases." },
-          { q: "Data Table: Force to pull a block on Glass (2N), Wood (5N), Sandpaper (12N). Conclusion?", options: ["Rougher surfaces produce more frictional force.", "Smoother surfaces produce more friction.", "Weight affects friction.", "Glass is magnetic."], correct: "Rougher surfaces produce more frictional force." }
+          { q: "Which force causes a ball thrown high into the air to fall back down?", options: ["Gravitational force", "Frictional force", "Magnetic force", "Elastic spring force"], correct: "Gravitational force" },
+          { q: "Graph Analysis: A straight diagonal line shows spring extension vs weight added. What does this signify?", options: ["Extension increases steadily as weight increases.", "The spring is broken.", "Gravity decreases as weight increases.", "Friction is opposing the pull."], correct: "Extension increases steadily as weight increases." },
+          { q: "Data Table: Force required to pull a block on Glass (2N), Wood (5N), Sandpaper (12N). Conclusion?", options: ["Rougher surfaces produce more frictional force.", "Smoother surfaces produce more friction.", "Weight affects friction.", "Glass is magnetic."], correct: "Rougher surfaces produce more frictional force." },
+          { q: "Why do mechanics apply lubricating oil to moving machine parts?", options: ["To reduce friction and prevent wear.", "To increase friction for better grip.", "To make the machine heavier.", "To change the shape of the parts."], correct: "To reduce friction and prevent wear." },
+          { q: "Which of the following situations describes an elastic spring force acting on an object?", options: ["A compressed spring pushing a toy car forward.", "A magnet picking up iron nails.", "An apple falling from a tree.", "A book sliding to a stop on a table."], correct: "A compressed spring pushing a toy car forward." },
+          { q: "Experiment: A toy car rolls down a ramp onto different surfaces. To ensure a fair test, what must be constant?", options: ["The release height of the toy car on the ramp.", "The surface of the floor.", "The distance the car travels.", "The final speed of the car."], correct: "The release height of the toy car on the ramp." },
+          { q: "Definition: Gravitational Force is a force that...", options: ["pulls objects towards the center of the Earth.", "pushes objects away from the Earth.", "opposes motion between two rubbing surfaces.", "exists only between two strong magnets."], correct: "pulls objects towards the center of the Earth." },
+          { q: "What unit is used to measure Force?", options: ["Newtons (N)", "Kilograms (kg)", "Joules (J)", "Degrees Celsius"], correct: "Newtons (N)" }
         ],
         "Interactions (Web of Life)": [
-          { q: "A food web consists of Grass -> Rabbit -> Fox. What happens if the Rabbit dies out?", options: ["Fox population decreases, Grass population increases.", "Fox population increases, Grass population decreases.", "Both Fox and Grass populations increase.", "Both Fox and Grass populations decrease."], correct: "Fox population decreases, Grass population increases." },
-          { q: "What is the main source of energy for most food webs?", options: ["The Sun", "Water", "Soil", "Oxygen"], correct: "The Sun" },
-          { q: "Definition: A 'Population' in an ecosystem is...", options: ["a group of organisms of the same kind living in the same habitat.", "all living and non-living things in an area.", "organisms that make their own food.", "animals that hunt prey."], correct: "a group of organisms of the same kind living in the same habitat." },
-          { q: "Data: Snail X is placed in an airtight jar. Snail Y is in a jar with a Plant. Snail Y lives longer. Why?", options: ["The plant produces oxygen which the snail uses to breathe.", "The plant provides heat.", "The snail eats the glass.", "The plant produces carbon dioxide."], correct: "The plant produces oxygen which the snail uses to breathe." },
-          { q: "What role do decomposers like fungi play?", options: ["They break down dead matter into simple substances.", "They hunt other animals.", "They provide shelter.", "They photosynthesize."], correct: "They break down dead matter into simple substances." }
+          { q: "A food web consists of Grass -> Rabbit -> Fox. What happens immediately if a disease wipes out the Rabbits?", options: ["Fox population decreases, Grass population increases.", "Fox population increases, Grass population decreases.", "Both Fox and Grass populations increase.", "Both Fox and Grass populations decrease."], correct: "Fox population decreases, Grass population increases." },
+          { q: "What is the ultimate, primary source of energy for almost all food webs on Earth?", options: ["The Sun", "Water", "Soil Minerals", "Oxygen Gas"], correct: "The Sun" },
+          { q: "Definition: A 'Population' in an ecosystem is formally defined as...", options: ["a group of organisms of the same kind living in the same habitat.", "all living and non-living things interacting in an area.", "organisms that can make their own food.", "animals that hunt other animals for prey."], correct: "a group of organisms of the same kind living in the same habitat." },
+          { q: "Data: Snail X is placed in a sealed jar. Snail Y is in a sealed jar with a Plant. Snail Y lives much longer. Why?", options: ["The plant produces oxygen which the snail uses to breathe.", "The plant provides necessary heat.", "The snail eats the glass.", "The plant produces carbon dioxide."], correct: "The plant produces oxygen which the snail uses to breathe." },
+          { q: "What critical role do decomposers like fungi and bacteria play in the environment?", options: ["They break down dead matter into simple substances for plants.", "They hunt other animals to keep populations down.", "They provide shelter for small insects.", "They photosynthesize to create oxygen."], correct: "They break down dead matter into simple substances for plants." },
+          { q: "Which of the following organisms is considered a 'producer'?", options: ["A fern plant", "A lion", "A human being", "A mushroom"], correct: "A fern plant" },
+          { q: "How do consumers (animals) obtain their energy in a food web?", options: ["By eating plants or other animals.", "By absorbing sunlight directly.", "By drinking mineral-rich water.", "By absorbing nutrients from soil."], correct: "By eating plants or other animals." },
+          { q: "Data Table: Organism X's population drops in June. Organism Y's population rises in June. X eats Y. Why did Y rise?", options: ["Fewer Organism X are alive to eat Organism Y.", "Organism Y ate all of Organism X.", "Organism Y learned to photosynthesize.", "Organism X mutated into Organism Y."], correct: "Fewer Organism X are alive to eat Organism Y." },
+          { q: "A line graph shows a predator population's peaks and valleys lagging slightly behind a prey's population. Why?", options: ["Predator numbers depend directly on the availability of prey.", "Prey numbers depend only on the weather.", "They do not actually interact.", "Predators eat plants when prey is low."], correct: "Predator numbers depend directly on the availability of prey." },
+          { q: "What do the arrows in a food chain diagram represent?", options: ["The direction of energy transfer.", "Who eats who (pointing to the eaten).", "The flow of water.", "The movement of animals."], correct: "The direction of energy transfer." }
         ],
         "Energy (Kinetic & Potential)": [
-          { q: "Definition: Kinetic Energy is...", options: ["the energy an object has due to its motion.", "energy stored due to an object's position.", "energy given off as heat.", "energy used by plants to make food."], correct: "the energy an object has due to its motion." },
-          { q: "Definition: Potential Energy is...", options: ["stored energy in an object due to its position or state.", "energy of a moving car.", "energy from the sun.", "energy that flows from hot to cold."], correct: "stored energy in an object due to its position or state." },
-          { q: "A ball rolls down a ramp. What energy conversion is happening?", options: ["Potential Energy is converting into Kinetic Energy.", "Kinetic Energy is converting into Potential Energy.", "Heat Energy is converting into Kinetic Energy.", "Light Energy is converting into Potential Energy."], correct: "Potential Energy is converting into Kinetic Energy." },
-          { q: "When does a stretched rubber band have the most potential energy?", options: ["When it is stretched to its maximum.", "When it is resting on a table.", "When it snaps.", "When it is heated."], correct: "When it is stretched to its maximum." },
-          { q: "Data: A marble dropped from 10cm makes a 1cm crater. Dropped from 50cm makes a 4cm crater. Conclusion?", options: ["An object at a greater height has more potential energy.", "An object at a lower height has more kinetic energy.", "Gravity increases as you go higher.", "The marble gets heavier."], correct: "An object at a greater height has more potential energy." }
+          { q: "Definition: Kinetic Energy is scientifically defined as...", options: ["the energy an object possesses due to its motion.", "energy stored due to an object's elevated position.", "energy given off as radiant heat.", "energy used by plants to make food."], correct: "the energy an object possesses due to its motion." },
+          { q: "Definition: Potential Energy is defined as...", options: ["stored energy in an object due to its position or state.", "the energy of a fast-moving car.", "energy radiated from the sun.", "energy that flows from a hot object to a cold one."], correct: "stored energy in an object due to its position or state." },
+          { q: "A ball rolls down a steep ramp. What is the primary energy conversion taking place?", options: ["Potential Energy is converting into Kinetic Energy.", "Kinetic Energy is converting into Potential Energy.", "Heat Energy is converting into Kinetic Energy.", "Light Energy is converting into Potential Energy."], correct: "Potential Energy is converting into Kinetic Energy." },
+          { q: "When does a stretched rubber band contain the absolute most potential energy?", options: ["When it is stretched to its maximum limit.", "When it is resting limply on a table.", "Just after it snaps.", "When it is heated in the sun."], correct: "When it is stretched to its maximum limit." },
+          { q: "Data: A marble dropped from 10cm makes a 1cm crater. Dropped from 50cm makes a 4cm crater. Conclusion?", options: ["An object at a greater height possesses more potential energy.", "An object at a lower height possesses more kinetic energy.", "Gravity's pull increases as you go higher.", "The marble gets heavier as it falls."], correct: "An object at a greater height possesses more potential energy." },
+          { q: "A graph charts the kinetic energy of a swinging pendulum. At what point is kinetic energy at its highest?", options: ["At the lowest point of its swing.", "At the highest point of its swing.", "When it finally stops moving.", "Just before it is released by the hand."], correct: "At the lowest point of its swing." },
+          { q: "Experiment: Winding a toy car's spring 5 times vs 10 times. What is the dependent (measured) variable?", options: ["The distance the toy car travels.", "The number of winds applied.", "The mass of the car.", "The surface it runs on."], correct: "The distance the toy car travels." },
+          { q: "What kind of energy does a speeding bullet possess the most of?", options: ["Kinetic energy", "Gravitational potential energy", "Light energy", "Sound energy"], correct: "Kinetic energy" },
+          { q: "As a roller coaster climbs to the top of the highest hill, what is happening to its energy?", options: ["Kinetic energy decreases, Potential energy increases.", "Kinetic energy increases, Potential energy decreases.", "Both Kinetic and Potential energy increase.", "Both Kinetic and Potential energy decrease."], correct: "Kinetic energy decreases, Potential energy increases." },
+          { q: "A compressed spring is released, shooting a block forward. What is the energy conversion?", options: ["Elastic Potential Energy -> Kinetic Energy", "Gravitational Potential Energy -> Kinetic Energy", "Kinetic Energy -> Heat Energy", "Light Energy -> Elastic Potential Energy"], correct: "Elastic Potential Energy -> Kinetic Energy" }
         ]
       }
     };
 
-    const MAP_SIZE = 35; 
     const CLASSES = {
       Warrior: { hp: 160, atk: 25, def: 20, hpGrow: 40, atkGrow: 12, defGrow: 8, basicAttackName: 'Sword Dance', ultName: 'Omnislash', color: '#1d4ed8' }, 
       Mage: { hp: 100, atk: 40, def: 10, hpGrow: 20, atkGrow: 18, defGrow: 4, basicAttackName: 'Cast', ultName: 'Meteor Strike', color: '#7e22ce' }, 
@@ -436,6 +501,7 @@
     };
 
     function App() {
+      // --- GAME STATE ---
       const [gameState, setGameState] = useState('START'); 
       const [logs, setLogs] = useState([]);
       const [mistakeLog, setMistakeLog] = useState([]); 
@@ -447,9 +513,9 @@
       const posRef = useRef({ x: 15, y: 15 }); 
       
       const availableGrades = ['P3', 'P4', 'P5', 'P6'];
-      const [selectedGrade, setSelectedGrade] = useState('P3');
+      const [selectedGrade, setSelectedGrade] = useState('P6');
       const [selectedTopics, setSelectedTopics] = useState(
-        Object.keys(QUESTION_BANKS['P3']).map(t => `P3|${t}`)
+        Object.keys(QUESTION_BANKS['P6']).map(t => `P6|${t}`)
       );
 
       const [player, setPlayer] = useState({
@@ -467,6 +533,8 @@
       const [isActionLocked, setIsActionLocked] = useState(false); 
       const [quizType, setQuizType] = useState(null); 
       const [ultAnswers, setUltAnswers] = useState([]);
+      
+      // Question Bank Ref logic perfectly ensures non-repetition until empty
       const unaskedQuestions = useRef([]); 
 
       const [screenVfx, setScreenVfx] = useState(null); 
@@ -536,6 +604,7 @@
       };
 
       const getNextScienceQuestion = () => {
+        // This precise block ensures that questions NEVER repeat until the selected pool is 100% exhausted.
         if (unaskedQuestions.current.length === 0) {
           let questionsPool = [];
           player.selectedTopics.forEach(tId => {
@@ -946,7 +1015,7 @@
             setPlayerPos(parsed.playerPos); posRef.current = parsed.playerPos;
             setTreasures(parsed.treasures); setLogs(parsed.logs || []);
             unaskedQuestions.current = parsed.unaskedQuestions || [];
-            setSelectedGrade(parsed.selectedGrade || 'P3'); setSelectedTopics(parsed.selectedTopics || []);
+            setSelectedGrade(parsed.selectedGrade || 'P6'); setSelectedTopics(parsed.selectedTopics || []);
             setMistakeLog(parsed.mistakeLog || []); 
             setWorldMap(generateMap()); setGameState('EXPLORE');
           }
@@ -1006,10 +1075,10 @@
             {worldMap.map((row, y) => row.map((tile, x) => {
               let bg = '#1f2937';
               if (x === playerPos.x && y === playerPos.y) bg = '#ffffff'; 
-              else if (tile === '.') bg = '#22c55e';
-              else if (tile === 'T') bg = '#166534';
-              else if (tile === 'M') bg = '#78350f';
-              else if (tile === '~') bg = '#3b82f6';
+              else if (tile === '.') bg = '#4da638';
+              else if (tile === 'T') bg = '#176b17';
+              else if (tile === 'M') bg = '#8c5e30';
+              else if (tile === '~') bg = '#2b5bc2';
               else if (tile === 'D') bg = '#7f1d1d';
               else if (tile === 'L') bg = '#ef4444'; 
               else if (tile === 'O') bg = '#eab308';
@@ -1252,7 +1321,7 @@
             </div>
           )}
 
-          {/* MAIN GAME VIEW */}
+          {/* MAIN GAME VIEW (Matches Layout Image Exactly) */}
           {['EXPLORE', 'TOWN', 'SHOP', 'MYSTICAL_SHOP', 'COMBAT', 'LOOT'].includes(gameState) && (
             <div className="game-layout">
               
